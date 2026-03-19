@@ -207,7 +207,7 @@ export default function Index() {
               <div style={{ fontWeight: 700, marginBottom: 8 }}>Conversion legend</div>
               <div style={{ fontSize: 13, color: '#475569' }}>
                 Conversion is calculated as <strong>purchases / views</strong> (over aggregated data).
-                <ul>
+                <ul style={{ margin: 0, padding: 0 }}>
                   <li>🔴 Losing sales — conversion &lt; 2% (0.02)</li>
                   <li>🟡 Low conversion — conversion ≥ 2% and &lt; 5% (0.02–0.05)</li>
                   <li>🟢 Good — conversion ≥ 5% (≥ 0.05)</li>
@@ -228,7 +228,7 @@ export default function Index() {
       </s-section>
       <s-section heading="Product List">
         <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, alignItems: 'flex-start', marginBottom: 12 }}>
-          <div style={{ display: 'block', gap: 12, alignItems: 'center', justifyContent: 'space-between'}}>
+          <div style={{ display: 'flex', gap: 12, alignItems: 'center', justifyContent: 'space-between'}}>
             <div style={{ color: '#475569', fontSize: 13 }}>
               Tracking is active. Data updates as visitors interact with your storefront.
             </div>
