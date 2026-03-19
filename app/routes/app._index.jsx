@@ -213,7 +213,7 @@ export default function Index() {
   const metricStyle = { ...tdStyle, textAlign: "center", color: "#0f172a", fontWeight: 700 };
 
   return (
-    <s-page heading="Store Products">
+    <s-page heading="Conversion Insights" fullWidth>
       <style>{`
         .ci-overview {
           width: 100%;

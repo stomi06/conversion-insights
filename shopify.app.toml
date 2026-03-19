@@ -1,7 +1,7 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "d597093ffc983f0cb8a34c1059d74349"
-name = "conversion-insights"
+name = "Conversion Insights"
 application_url = "https://conversion-insights.onrender.com"
 embedded = true
 
