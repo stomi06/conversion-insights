@@ -1,6 +1,6 @@
 import { boundary } from "@shopify/shopify-app-react-router/server";
 import { authenticate } from "../shopify.server";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useLoaderData, useRevalidator } from "react-router";
 import { getStatsTotalsByProducts, normalizeProductId } from "../product-stats.server";
 
@@ -100,6 +100,28 @@ export default function Index() {
     const [sortBy, setSortBy] = useState('conversion');
     const [sortDir, setSortDir] = useState('asc');
   const revalidator = useRevalidator();
+  const containerRef = useRef(null);
+  const menuRef = useRef(null);
+  const [openMenuProduct, setOpenMenuProduct] = useState(null);
+  const [menuPos, setMenuPos] = useState({ top: 0, left: 0 });
+
+  useEffect(() => {
+    if (!openMenuProduct) return;
+    function onDocClick(e) {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setOpenMenuProduct(null);
+      }
+    }
+    function onResize() {
+      setOpenMenuProduct(null);
+    }
+    document.addEventListener('click', onDocClick);
+    window.addEventListener('resize', onResize);
+    return () => {
+      document.removeEventListener('click', onDocClick);
+      window.removeEventListener('resize', onResize);
+    };
+  }, [openMenuProduct]);
 
   useEffect(() => {
     const onVisibilityChange = () => {
@@ -214,7 +236,7 @@ export default function Index() {
             </select>
           </div>
         </div>
-        <div style={cardStyle}>
+        <div style={cardStyle} ref={containerRef}>
           <table style={tableStyle}>
             <thead>
               <tr>
@@ -255,30 +277,19 @@ export default function Index() {
                         <span style={{ display: "inline-block", padding: "6px 10px", borderRadius: 999, border: `1px solid ${product.statusColors.border}`, background: product.statusColors.background, color: product.statusColors.color, fontWeight: 600, fontSize: 12 }}>
                           {product.status}
                         </span>
-                        <details style={{ marginLeft: 8 }}>
-                          <summary style={{ cursor: 'pointer', listStyle: 'none', padding: '6px 8px', borderRadius: 6, background: '#ffffff', border: '1px solid #e6eef6' }}>⋯</summary>
-                          <div style={{ padding: 8, display: 'flex', flexDirection: 'column', gap: 6 }}>
-                            <a href={`https://${shop}/admin/products/${product.numericProductId}`} target="_blank" rel="noreferrer" style={{ color: '#0369a1' }}>Open in Admin</a>
-                            <button onClick={async () => {
-                              if (!confirm('Remove product from tracking? This deletes aggregated stats.')) return;
-                              try {
-                                const res = await fetch('/api/untrack_product', {
-                                  method: 'POST',
-                                  headers: { 'Content-Type': 'application/json' },
-                                  body: JSON.stringify({ productId: product.numericProductId }),
-                                });
-                                if (res.ok) {
-                                  revalidator.revalidate();
-                                } else {
-                                  const txt = await res.text();
-                                  alert('Remove failed: ' + txt);
-                                }
-                              } catch (err) {
-                                alert('Request failed');
-                              }
-                            }} style={{ padding: '6px 8px', borderRadius: 6, border: '1px solid #fee2e2', background: '#fff0f0', color: '#991b1b' }}>Remove from tracking</button>
-                          </div>
-                        </details>
+                        <div style={{ marginLeft: 8 }}>
+                          <button onClick={(e) => {
+                            e.stopPropagation();
+                            const btn = e.currentTarget;
+                            const rect = btn.getBoundingClientRect();
+                            const containerRect = containerRef.current?.getBoundingClientRect() || { left: 0, top: 0 };
+                            setMenuPos({
+                              top: rect.top - containerRect.top + rect.height + window.scrollY,
+                              left: rect.left - containerRect.left + window.scrollX,
+                            });
+                            setOpenMenuProduct(product);
+                          }} aria-haspopup="true" aria-expanded={openMenuProduct?.numericProductId === product.numericProductId} style={{ padding: '6px 8px', borderRadius: 6, border: '1px solid #e6eef6', background: '#ffffff' }}>⋯</button>
+                        </div>
                       </div>
                     </td>
                   </tr>
@@ -286,6 +297,35 @@ export default function Index() {
               })}
             </tbody>
           </table>
+          {openMenuProduct && (
+            <div ref={menuRef} style={{ position: 'absolute', top: menuPos.top, left: menuPos.left, zIndex: 9999 }}>
+              <div style={{ minWidth: 200, padding: 8, background: '#fff', border: '1px solid #e6eef6', borderRadius: 8, boxShadow: '0 8px 24px rgba(2,32,71,0.08)' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <a href={`https://${shop}/admin/products/${openMenuProduct.numericProductId}`} target="_blank" rel="noreferrer" style={{ color: '#0369a1' }}>Open in Admin</a>
+                  <button onClick={async () => {
+                    if (!confirm('Remove product from tracking? This deletes aggregated stats.')) return;
+                    try {
+                      const res = await fetch('/api/untrack_product', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ productId: openMenuProduct.numericProductId }),
+                      });
+                      if (res.ok) {
+                        setOpenMenuProduct(null);
+                        revalidator.revalidate();
+                      } else {
+                        const txt = await res.text();
+                        alert('Remove failed: ' + txt);
+                      }
+                    } catch (err) {
+                      alert('Request failed');
+                    }
+                  }} style={{ padding: '6px 8px', borderRadius: 6, border: '1px solid #fee2e2', background: '#fff0f0', color: '#991b1b' }}>Remove from tracking</button>
+                  <button onClick={() => setOpenMenuProduct(null)} style={{ padding: '6px 8px', borderRadius: 6, border: '1px solid #e6eef6', background: '#ffffff' }}>Close</button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </s-section>
     </s-page>
