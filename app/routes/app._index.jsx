@@ -157,7 +157,7 @@ export default function Index() {
           border: "#fde68a",
         };
       } else {
-        status = "🔴 At risk";
+        status = "🔴 Losing sales";
         statusColors = {
           color: "#7f1d1d",
           background: "#fecaca",
@@ -305,11 +305,6 @@ export default function Index() {
                         <span style={{ display: "inline-block", padding: "6px 12px", borderRadius: 999, border: `1px solid ${product.statusColors.border}`, background: product.statusColors.background, color: product.statusColors.color, fontWeight: product.status.indexOf('🔴') === 0 ? 800 : 600, fontSize: 12, whiteSpace: 'nowrap' }}>
                           {product.status}
                         </span>
-                        {product.status && product.status.indexOf('🔴') !== -1 && (
-                          <div style={{ marginTop: 6, color: '#7f1d1d', fontSize: 13 }}>
-                            Customers add to cart but don’t buy
-                          </div>
-                        )}
                         <div style={{ marginLeft: 8 }}>
                           <a href={`https://${shop}/admin/products/${product.numericProductId}`} target="_blank" rel="noreferrer" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 34, height: 34, borderRadius: 8, border: '1px solid #e6eef6', background: '#ffffff', color: '#0369a1', textDecoration: 'none' }} aria-label="Open product">
                             <img src="/assets/arrow.svg" alt="Open product" style={{ width: 16, height: 16 }} />
