@@ -23,6 +23,9 @@
   const STORAGE_KEY = 'conversion-insights-event-buffer-v1';
   const FLUSH_INTERVAL_MS = 15000;
   const MAX_BUFFERED_EVENTS = 5;
+  const ATC_DEDUP_WINDOW_MS = 1200;
+  let lastAtcProductId = null;
+  let lastAtcAt = 0;
 
   function normalizeProductId(rawProductId) {
     if (rawProductId === null || rawProductId === undefined) return null;
@@ -163,6 +166,16 @@
     }
   }
 
+  function shouldTrackAtc(productId) {
+    const now = Date.now();
+    if (lastAtcProductId === productId && now - lastAtcAt < ATC_DEDUP_WINDOW_MS) {
+      return false;
+    }
+    lastAtcProductId = productId;
+    lastAtcAt = now;
+    return true;
+  }
+
   try {
     let productId = detectProductId();
 
@@ -183,6 +196,7 @@
       const currentProductId = detectProductId() || productId;
       if (isAddToCartClick && currentProductId) {
         productId = currentProductId;
+        if (!shouldTrackAtc(currentProductId)) return;
         incrementBufferedEvent(currentProductId, 'add_to_cart', 1);
         flushBuffer();
       }
@@ -198,6 +212,7 @@
       const currentProductId = detectProductId() || productId;
       if (isAddToCartForm && currentProductId) {
         productId = currentProductId;
+        if (!shouldTrackAtc(currentProductId)) return;
         incrementBufferedEvent(currentProductId, 'add_to_cart', 1);
         flushBuffer({ forceBeacon: true });
       }
