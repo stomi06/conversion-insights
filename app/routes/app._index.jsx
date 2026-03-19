@@ -260,7 +260,6 @@ export default function Index() {
                   <option value="asc">Ascending</option>
                   <option value="desc">Descending</option>
                 </select>
-                <div style={{ fontSize: 13, color: '#94a3b8' }}>Sorted by conversion (worst first)</div>
             </div>
           </div>
 
