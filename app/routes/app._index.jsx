@@ -258,7 +258,7 @@ export default function Index() {
                 <th style={{ ...thStyle, width: 110, textAlign: "center" }}>ATC</th>
                 <th style={{ ...thStyle, width: 100, textAlign: "center" }}>Sales</th>
                 <th style={{ ...thStyle, width: 120, textAlign: "center" }}>Conversion</th>
-                <th style={{ ...thStyle, width: 170 }}>Status</th>
+                <th style={{ ...thStyle, width: 170, textAlign: "center" }}>Status</th>
               </tr>
             </thead>
             <tbody>
