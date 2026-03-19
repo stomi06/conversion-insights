@@ -34,6 +34,48 @@
     return (numericMatch && numericMatch[1]) || value;
   }
 
+  function detectProductId() {
+    const productIdInput = document.querySelector('input[name="product-id"], input[name="product_id"], [data-product-id]');
+    const productIdFromDom =
+      (productIdInput && productIdInput.value) ||
+      (productIdInput && productIdInput.getAttribute && productIdInput.getAttribute('data-product-id'));
+
+    const candidates = [
+      window.Shopify && window.Shopify.product && window.Shopify.product.id,
+      window.meta && window.meta.product && window.meta.product.id,
+      window.ShopifyAnalytics && window.ShopifyAnalytics.meta && window.ShopifyAnalytics.meta.product && window.ShopifyAnalytics.meta.product.id,
+      productIdFromDom,
+      document.body && document.body.getAttribute && document.body.getAttribute('data-product-id'),
+      document.documentElement && document.documentElement.getAttribute && document.documentElement.getAttribute('data-product-id'),
+    ];
+
+    for (let i = 0; i < candidates.length; i += 1) {
+      const normalized = normalizeProductId(candidates[i]);
+      if (normalized) return normalized;
+    }
+
+    try {
+      const jsonLdNodes = document.querySelectorAll('script[type="application/ld+json"]');
+      for (let i = 0; i < jsonLdNodes.length; i += 1) {
+        const text = jsonLdNodes[i] && jsonLdNodes[i].textContent;
+        if (!text) continue;
+        const data = JSON.parse(text);
+        const entries = Array.isArray(data) ? data : [data];
+        for (let j = 0; j < entries.length; j += 1) {
+          const entry = entries[j] || {};
+          const type = entry['@type'];
+          if (type !== 'Product') continue;
+          const normalized = normalizeProductId(entry.productID || entry.sku || entry['@id'] || entry.url);
+          if (normalized) return normalized;
+        }
+      }
+    } catch {
+      // ignore parse errors
+    }
+
+    return null;
+  }
+
   function loadBuffer() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
@@ -122,11 +164,13 @@
   }
 
   try {
-    const rawProductId = (window.Shopify && window.Shopify.product && window.Shopify.product.id) || null;
-    const productId = normalizeProductId(rawProductId);
+    let productId = detectProductId();
 
     if (productId) {
       incrementBufferedEvent(productId, 'view', 1);
+      setTimeout(function () {
+        flushBuffer();
+      }, 1000);
     }
 
     document.addEventListener('click', function (e) {
@@ -134,15 +178,28 @@
       const isAddToCartClick =
         target &&
         ((target.getAttribute && target.getAttribute('name') === 'add') ||
-          (target.matches && target.matches('[data-add-to-cart]')));
+          (target.matches && target.matches('[data-add-to-cart], [name="add"], .product-form__submit')));
 
-      if (isAddToCartClick && productId) {
-        incrementBufferedEvent(productId, 'add_to_cart', 1);
+      const currentProductId = detectProductId() || productId;
+      if (isAddToCartClick && currentProductId) {
+        productId = currentProductId;
+        incrementBufferedEvent(currentProductId, 'add_to_cart', 1);
+        flushBuffer();
+      }
+    }, { passive: true });
 
-        const buffered = loadBuffer();
-        if (getBufferedEventsCount(buffered) >= MAX_BUFFERED_EVENTS) {
-          flushBuffer();
-        }
+    document.addEventListener('submit', function (e) {
+      const form = e.target;
+      const isAddToCartForm =
+        form &&
+        form.matches &&
+        (form.matches('form[action*="/cart/add"]') || form.matches('product-form form'));
+
+      const currentProductId = detectProductId() || productId;
+      if (isAddToCartForm && currentProductId) {
+        productId = currentProductId;
+        incrementBufferedEvent(currentProductId, 'add_to_cart', 1);
+        flushBuffer({ forceBeacon: true });
       }
     }, { passive: true });
 
