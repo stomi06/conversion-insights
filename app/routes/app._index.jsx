@@ -254,6 +254,8 @@ export default function Index() {
 
         .ci-metrics-line-cell {
           display: none;
+          border-top: 1px solid #e6eef6;
+          border-bottom: 1px solid #e6eef6;
         }
 
         .ci-metrics-line {
