@@ -198,8 +198,8 @@ export default function Index() {
   });
 
   const tableStyle = { width: "100%", borderCollapse: "collapse", fontFamily: "Inter, Arial, sans-serif" };
-  const thStyle = { border: "1px solid #e6eef6", padding: "11px", textAlign: "left", background: "#eef6ff", color: "#12263f" };
-  const tdStyle = { border: "1px solid #e6eef6", padding: "11px", verticalAlign: "middle" };
+  const thStyle = { border: "none", borderBottom: "1px solid #dbeafe", padding: "11px", textAlign: "left", background: "#eef6ff", color: "#12263f" };
+  const tdStyle = { border: "none", borderBottom: "1px solid #eef2f7", padding: "11px", verticalAlign: "middle" };
   const cardStyle = {
     background: "linear-gradient(180deg, #ffffff 0%, #f8fbff 100%)",
     border: "1px solid #dbeafe",
@@ -250,6 +250,26 @@ export default function Index() {
           width: 100%;
           overflow: hidden;
           box-sizing: border-box;
+        }
+
+        .ci-metrics-line-cell {
+          display: none;
+        }
+
+        .ci-metrics-line {
+          display: flex;
+          gap: 8px;
+          align-items: center;
+          justify-content: space-between;
+          white-space: nowrap;
+          font-size: 12px;
+          color: #334155;
+          font-weight: 700;
+        }
+
+        .ci-metrics-line span {
+          flex: 1 1 0;
+          text-align: center;
         }
 
         @media (max-width: 768px) {
@@ -311,6 +331,17 @@ export default function Index() {
           .ci-table td {
             border: none;
             padding: 8px 0;
+          }
+
+          .ci-table td[data-label="Views"],
+          .ci-table td[data-label="ATC"],
+          .ci-table td[data-label="Sales"],
+          .ci-table td[data-label="Conversion"] {
+            display: none;
+          }
+
+          .ci-metrics-line-cell {
+            display: block;
           }
 
           .ci-table td[data-label]::before {
@@ -425,6 +456,14 @@ export default function Index() {
                     <td data-label="ATC" style={metricStyle}>{product.stats.addToCart}</td>
                     <td data-label="Sales" style={metricStyle}>{product.stats.purchases}</td>
                     <td data-label="Conversion" style={metricStyle}>{(product.conversion * 100).toFixed(2)}%</td>
+                    <td data-label="Metrics" className="ci-metrics-line-cell" style={tdStyle}>
+                      <div className="ci-metrics-line">
+                        <span>Views: {product.stats.views}</span>
+                        <span>ATC: {product.stats.addToCart}</span>
+                        <span>Sales: {product.stats.purchases}</span>
+                        <span>Conv: {(product.conversion * 100).toFixed(2)}%</span>
+                      </div>
+                    </td>
                     <td data-label="Status" style={tdStyle}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <span style={{ display: "inline-block", padding: "6px 12px", borderRadius: 999, border: `1px solid ${product.statusColors.border}`, background: product.statusColors.background, color: product.statusColors.color, fontWeight: product.status.indexOf('🔴') === 0 ? 800 : 600, fontSize: 12, whiteSpace: 'nowrap' }}>
