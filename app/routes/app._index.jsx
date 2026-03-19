@@ -270,6 +270,15 @@ export default function Index() {
         .ci-metrics-line span {
           flex: 1 1 0;
           text-align: center;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 4px;
+        }
+
+        .ci-metric-icon {
+          width: 14px;
+          height: 14px;
         }
 
         @media (max-width: 768px) {
@@ -425,9 +434,24 @@ export default function Index() {
             <thead>
               <tr>
                 <th style={{ ...thStyle, width: 100, textAlign: "center" }}>Product</th>
-                <th style={{ ...thStyle, width: 100, textAlign: "center" }}>Views</th>
-                <th style={{ ...thStyle, width: 110, textAlign: "center" }}>ATC</th>
-                <th style={{ ...thStyle, width: 100, textAlign: "center" }}>Sales</th>
+                <th style={{ ...thStyle, width: 100, textAlign: "center" }}>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                    <img src="/assets/eye.svg" alt="Views" style={{ width: 14, height: 14 }} />
+                    Views
+                  </span>
+                </th>
+                <th style={{ ...thStyle, width: 110, textAlign: "center" }}>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                    <img src="/assets/cart.svg" alt="ATC" style={{ width: 14, height: 14 }} />
+                    ATC
+                  </span>
+                </th>
+                <th style={{ ...thStyle, width: 100, textAlign: "center" }}>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                    <img src="/assets/sold.svg" alt="Sales" style={{ width: 14, height: 14 }} />
+                    Sales
+                  </span>
+                </th>
                 <th style={{ ...thStyle, width: 120, textAlign: "center" }}>Conversion</th>
                 <th style={{ ...thStyle, width: 170, textAlign: "center" }}>Status</th>
               </tr>
@@ -458,10 +482,10 @@ export default function Index() {
                     <td data-label="Conversion" style={metricStyle}>{(product.conversion * 100).toFixed(2)}%</td>
                     <td data-label="Metrics" className="ci-metrics-line-cell" style={tdStyle}>
                       <div className="ci-metrics-line">
-                        <span>Views: {product.stats.views}</span>
-                        <span>ATC: {product.stats.addToCart}</span>
-                        <span>Sales: {product.stats.purchases}</span>
-                        <span>Conv: {(product.conversion * 100).toFixed(2)}%</span>
+                        <span><img className="ci-metric-icon" src="/assets/eye.svg" alt="Views" />{product.stats.views}</span>
+                        <span><img className="ci-metric-icon" src="/assets/cart.svg" alt="ATC" />{product.stats.addToCart}</span>
+                        <span><img className="ci-metric-icon" src="/assets/sold.svg" alt="Sales" />{product.stats.purchases}</span>
+                        <span>{(product.conversion * 100).toFixed(2)}%</span>
                       </div>
                     </td>
                     <td data-label="Status" style={tdStyle}>
