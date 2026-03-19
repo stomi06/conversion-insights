@@ -351,8 +351,6 @@ export default function Index() {
 
           .ci-metrics-line-cell {
             display: block;
-            border-top: 1px solid #e6eef6;
-            border-bottom: 1px solid #e6eef6;
           }
 
           .ci-table td[data-label]::before {
@@ -402,7 +400,7 @@ export default function Index() {
               <div style={{ fontSize: 13, color: '#475569' }}>
                 Need help or want improvements? Contact us:
                 <div style={{ marginTop: 8 }}>
-                  <a href="mailto:support@conversion-insights.app" style={{ color: '#0369a1' }}>support@conversion-insights.app</a>
+                  <a href="mailto:stoma.michal6@gmail.com" style={{ color: '#0369a1' }}>stoma.michal6@gmail.com</a>
                 </div>
               </div>
             </div>
