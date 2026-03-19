@@ -369,7 +369,7 @@ export default function Index() {
           .ci-table td[data-label="Status"] > div {
             width: 100%;
             justify-content: space-between;
-            border-bottom: none;
+            border: none;
           }
         }
       `}</style>
