@@ -227,6 +227,7 @@ export default function Index() {
           flex: 1 1 280px;
           min-width: 0;
           width: 100%;
+          box-sizing: border-box;
         }
 
         .ci-list-header {
@@ -248,9 +249,22 @@ export default function Index() {
         .ci-table-wrap {
           width: 100%;
           overflow: hidden;
+          box-sizing: border-box;
         }
 
         @media (max-width: 768px) {
+          .ci-overview,
+          .ci-list-header,
+          .ci-sort-controls,
+          .ci-table-wrap,
+          .ci-table,
+          .ci-table tbody,
+          .ci-table tr,
+          .ci-table td {
+            box-sizing: border-box;
+            max-width: 100%;
+          }
+
           .ci-overview {
             flex-direction: column;
           }
@@ -291,6 +305,7 @@ export default function Index() {
             margin-bottom: 12px;
             padding: 10px;
             background: #ffffff;
+            overflow: hidden;
           }
 
           .ci-table td {
