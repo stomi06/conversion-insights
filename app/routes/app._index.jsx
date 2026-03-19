@@ -1,6 +1,6 @@
 import { boundary } from "@shopify/shopify-app-react-router/server";
 import { authenticate } from "../shopify.server";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useLoaderData, useRevalidator } from "react-router";
 import { getStatsTotalsByProducts, normalizeProductId } from "../product-stats.server";
 
@@ -89,13 +89,16 @@ export const loader = async ({ request }) => {
         purchases: 0,
       },
     })),
+    shop: session.shop,
   };
 };
 
 
 
 export default function Index() {
-  const { productList } = useLoaderData();
+  const { productList, shop } = useLoaderData();
+    const [sortBy, setSortBy] = useState('conversion');
+    const [sortDir, setSortDir] = useState('asc');
   const revalidator = useRevalidator();
 
   useEffect(() => {
@@ -155,11 +158,24 @@ export default function Index() {
         status,
         statusColors,
       };
-    })
-    .sort((a, b) => {
-      if (a.conversion !== b.conversion) return a.conversion - b.conversion;
-      return b.stats.views - a.stats.views;
     });
+
+  const sortedProducts = [...productsWithInsights].sort((a, b) => {
+    const dir = sortDir === 'asc' ? 1 : -1;
+    switch (sortBy) {
+      case 'views':
+        return (a.stats.views - b.stats.views) * dir;
+      case 'atc':
+        return (a.stats.addToCart - b.stats.addToCart) * dir;
+      case 'sales':
+        return (a.stats.purchases - b.stats.purchases) * dir;
+      case 'name':
+        return a.title.localeCompare(b.title) * dir;
+      case 'conversion':
+      default:
+        return (a.conversion - b.conversion) * dir;
+    }
+  });
 
   const tableStyle = { width: "100%", borderCollapse: "collapse", fontFamily: "Inter, Arial, sans-serif" };
   const thStyle = { border: "1px solid #e6eef6", padding: "11px", textAlign: "left", background: "#eef6ff", color: "#12263f" };
@@ -179,8 +195,24 @@ export default function Index() {
   return (
     <s-page heading="Store Products">
       <s-section heading="Product List">
-        <div style={{ marginBottom: 12, color: "#475569", fontSize: 13 }}>
-          Tracking is active. Data updates as visitors interact with your storefront.
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+          <div style={{ color: '#475569', fontSize: 13 }}>
+            Tracking is active. Data updates as visitors interact with your storefront.
+          </div>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <label style={{ fontSize: 13, color: '#475569' }}>Sort by</label>
+            <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} style={{ padding: 6, borderRadius: 6 }}>
+              <option value="conversion">Conversion</option>
+              <option value="views">Views</option>
+              <option value="atc">Add to Cart</option>
+              <option value="sales">Purchases</option>
+              <option value="name">Name</option>
+            </select>
+            <select value={sortDir} onChange={(e) => setSortDir(e.target.value)} style={{ padding: 6, borderRadius: 6 }}>
+              <option value="asc">Ascending</option>
+              <option value="desc">Descending</option>
+            </select>
+          </div>
         </div>
         <div style={cardStyle}>
           <table style={tableStyle}>
@@ -195,7 +227,7 @@ export default function Index() {
               </tr>
             </thead>
             <tbody>
-              {productsWithInsights.map((product, i) => {
+              {sortedProducts.map((product, i) => {
                 const rowStyle = { background: i % 2 === 0 ? "#ffffff" : "#f8fbff" };
                 return (
                   <tr key={product.id} style={rowStyle}>
@@ -219,9 +251,35 @@ export default function Index() {
                     <td style={metricStyle}>{product.stats.purchases}</td>
                     <td style={metricStyle}>{(product.conversion * 100).toFixed(2)}%</td>
                     <td style={tdStyle}>
-                      <span style={{ display: "inline-block", padding: "6px 10px", borderRadius: 999, border: `1px solid ${product.statusColors.border}`, background: product.statusColors.background, color: product.statusColors.color, fontWeight: 600, fontSize: 12 }}>
-                        {product.status}
-                      </span>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ display: "inline-block", padding: "6px 10px", borderRadius: 999, border: `1px solid ${product.statusColors.border}`, background: product.statusColors.background, color: product.statusColors.color, fontWeight: 600, fontSize: 12 }}>
+                          {product.status}
+                        </span>
+                        <details style={{ marginLeft: 8 }}>
+                          <summary style={{ cursor: 'pointer', listStyle: 'none', padding: '6px 8px', borderRadius: 6, background: '#ffffff', border: '1px solid #e6eef6' }}>⋯</summary>
+                          <div style={{ padding: 8, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                            <a href={`https://${shop}/admin/products/${product.numericProductId}`} target="_blank" rel="noreferrer" style={{ color: '#0369a1' }}>Open in Admin</a>
+                            <button onClick={async () => {
+                              if (!confirm('Remove product from tracking? This deletes aggregated stats.')) return;
+                              try {
+                                const res = await fetch('/api/untrack_product', {
+                                  method: 'POST',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({ productId: product.numericProductId }),
+                                });
+                                if (res.ok) {
+                                  revalidator.revalidate();
+                                } else {
+                                  const txt = await res.text();
+                                  alert('Remove failed: ' + txt);
+                                }
+                              } catch (err) {
+                                alert('Request failed');
+                              }
+                            }} style={{ padding: '6px 8px', borderRadius: 6, border: '1px solid #fee2e2', background: '#fff0f0', color: '#991b1b' }}>Remove from tracking</button>
+                          </div>
+                        </details>
+                      </div>
                     </td>
                   </tr>
                 );
