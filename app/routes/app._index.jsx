@@ -118,46 +118,117 @@ export default function Index() {
     };
   }, [revalidator]);
 
+  const productsWithInsights = [...productList]
+    .map((product) => {
+      const views = Number(product?.stats?.views || 0);
+      const addToCart = Number(product?.stats?.addToCart || 0);
+      const purchases = Number(product?.stats?.purchases || 0);
+      const conversion = views > 0 ? purchases / views : 0;
+
+      let status = "🔴 Losing sales";
+      let statusColors = {
+        color: "#991b1b",
+        background: "#fee2e2",
+        border: "#fecaca",
+      };
+
+      if (conversion >= 0.05) {
+        status = "🟢 Good";
+        statusColors = {
+          color: "#166534",
+          background: "#dcfce7",
+          border: "#bbf7d0",
+        };
+      } else if (conversion >= 0.02) {
+        status = "🟡 Low conversion";
+        statusColors = {
+          color: "#854d0e",
+          background: "#fef9c3",
+          border: "#fde68a",
+        };
+      }
+
+      return {
+        ...product,
+        stats: { views, addToCart, purchases },
+        conversion,
+        status,
+        statusColors,
+      };
+    })
+    .sort((a, b) => {
+      if (a.conversion !== b.conversion) return a.conversion - b.conversion;
+      return b.stats.views - a.stats.views;
+    });
+
   const tableStyle = { width: "100%", borderCollapse: "collapse", fontFamily: "Inter, Arial, sans-serif" };
-  const thStyle = { border: "1px solid #e6eef6", padding: "10px", textAlign: "left", background: "#f5f9ff", color: "#12263f" };
-  const tdStyle = { border: "1px solid #e6eef6", padding: "10px", verticalAlign: "middle" };
+  const thStyle = { border: "1px solid #e6eef6", padding: "11px", textAlign: "left", background: "#eef6ff", color: "#12263f" };
+  const tdStyle = { border: "1px solid #e6eef6", padding: "11px", verticalAlign: "middle" };
+  const cardStyle = {
+    background: "linear-gradient(180deg, #ffffff 0%, #f8fbff 100%)",
+    border: "1px solid #dbeafe",
+    borderRadius: 12,
+    overflow: "hidden",
+    boxShadow: "0 8px 24px rgba(2, 32, 71, 0.06)",
+  };
+  const titleCellWrap = { display: "flex", alignItems: "center", gap: 12 };
+  const titleTextStyle = { margin: 0, fontSize: 14, fontWeight: 600, color: "#0f172a" };
+  const subtitleTextStyle = { margin: "3px 0 0", fontSize: 12, color: "#64748b" };
+  const metricStyle = { ...tdStyle, textAlign: "center", color: "#0f172a", fontWeight: 700 };
 
   return (
     <s-page heading="Store Products">
       <s-section heading="Product List">
-        <table style={tableStyle}>
-          <thead>
-            <tr>
-              <th style={thStyle}>ID</th>
-              <th style={{ ...thStyle, width: 72 }}>Image</th>
-              <th style={thStyle}>Title</th>
-              <th style={{ ...thStyle, width: 100, textAlign: "center" }}>Views</th>
-              <th style={{ ...thStyle, width: 120, textAlign: "center" }}>Add to Cart</th>
-              <th style={{ ...thStyle, width: 100, textAlign: "center" }}>Purchases</th>
-            </tr>
-          </thead>
-          <tbody>
-            {productList.map((product, i) => {
-              const rowStyle = { background: i % 2 === 0 ? "#ffffff" : "#fbfdff" };
-              return (
-                <tr key={product.id} style={rowStyle}>
-                  <td style={tdStyle}>{product.id}</td>
-                  <td style={tdStyle}>
-                    {product.imageUrl ? (
-                      <img src={product.imageUrl} alt={product.title} style={{ width: 48, height: 48, objectFit: "cover", borderRadius: 6 }} />
-                    ) : (
-                      <span style={{ color: "#94a3b8" }}>No image</span>
-                    )}
-                  </td>
-                  <td style={tdStyle}>{product.title}</td>
-                  <td style={{ ...tdStyle, textAlign: "center", color: "#0f172a", fontWeight: 600 }}>{product.stats.views}</td>
-                  <td style={{ ...tdStyle, textAlign: "center", color: "#0f172a", fontWeight: 600 }}>{product.stats.addToCart}</td>
-                  <td style={{ ...tdStyle, textAlign: "center", color: "#0f172a", fontWeight: 600 }}>{product.stats.purchases}</td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+        <div style={{ marginBottom: 12, color: "#475569", fontSize: 13 }}>
+          Tracking is active. Data updates as visitors interact with your storefront.
+        </div>
+        <div style={cardStyle}>
+          <table style={tableStyle}>
+            <thead>
+              <tr>
+                <th style={thStyle}>Product</th>
+                <th style={{ ...thStyle, width: 100, textAlign: "center" }}>Views</th>
+                <th style={{ ...thStyle, width: 110, textAlign: "center" }}>ATC</th>
+                <th style={{ ...thStyle, width: 100, textAlign: "center" }}>Sales</th>
+                <th style={{ ...thStyle, width: 120, textAlign: "center" }}>Conversion</th>
+                <th style={{ ...thStyle, width: 170 }}>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {productsWithInsights.map((product, i) => {
+                const rowStyle = { background: i % 2 === 0 ? "#ffffff" : "#f8fbff" };
+                return (
+                  <tr key={product.id} style={rowStyle}>
+                    <td style={tdStyle}>
+                      <div style={titleCellWrap}>
+                        {product.imageUrl ? (
+                          <img src={product.imageUrl} alt={product.title} style={{ width: 50, height: 50, objectFit: "cover", borderRadius: 10, border: "1px solid #e2e8f0" }} />
+                        ) : (
+                          <div style={{ width: 50, height: 50, borderRadius: 10, background: "#f1f5f9", border: "1px solid #e2e8f0", display: "grid", placeItems: "center", color: "#94a3b8", fontSize: 11 }}>
+                            No image
+                          </div>
+                        )}
+                        <div>
+                          <p style={titleTextStyle}>{product.title}</p>
+                          <p style={subtitleTextStyle}>ID: {product.numericProductId}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td style={metricStyle}>{product.stats.views}</td>
+                    <td style={metricStyle}>{product.stats.addToCart}</td>
+                    <td style={metricStyle}>{product.stats.purchases}</td>
+                    <td style={metricStyle}>{(product.conversion * 100).toFixed(2)}%</td>
+                    <td style={tdStyle}>
+                      <span style={{ display: "inline-block", padding: "6px 10px", borderRadius: 999, border: `1px solid ${product.statusColors.border}`, background: product.statusColors.background, color: product.statusColors.color, fontWeight: 600, fontSize: 12 }}>
+                        {product.status}
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       </s-section>
     </s-page>
   );
