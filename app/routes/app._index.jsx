@@ -194,29 +194,11 @@ export default function Index() {
 
   return (
     <s-page heading="Store Products">
-      <s-section heading="Product List">
-        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, alignItems: 'flex-start', marginBottom: 12 }}>
-          <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-            <div style={{ color: '#475569', fontSize: 13 }}>
-              Tracking is active. Data updates as visitors interact with your storefront.
-            </div>
-            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-              <label style={{ fontSize: 13, color: '#475569' }}>Sort by</label>
-              <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} style={{ padding: 6, borderRadius: 6 }}>
-                <option value="conversion">Conversion</option>
-                <option value="views">Views</option>
-                <option value="atc">Add to Cart</option>
-                <option value="sales">Purchases</option>
-                <option value="name">Name</option>
-              </select>
-              <select value={sortDir} onChange={(e) => setSortDir(e.target.value)} style={{ padding: 6, borderRadius: 6 }}>
-                <option value="asc">Ascending</option>
-                <option value="desc">Descending</option>
-              </select>
-            </div>
-          </div>
-
-          <div style={{ display: 'flex', gap: 12, alignItems: 'stretch' }}>
+      <s-section heading="Overview">
+        <div style={{ display: 'flex', gap: 12, alignItems: 'stretch' }}>
+            <p style={{ color: '#475569', fontSize: 13 }}>
+              Welcome to Conversion Insights! This dashboard helps you understand how your products are performing in terms of views, add-to-cart actions, and purchases. The conversion rate is calculated as purchases divided by views, giving you a clear picture of how well each product is converting visitors into customers. Use this information to identify which products are doing well and which may need attention to improve their performance.
+            </p>
             <div style={{ padding: 12, borderRadius: 8, background: '#f8fafc', border: '1px solid #e6eef6', minWidth: 260 }}>
               <div style={{ fontWeight: 700, marginBottom: 8 }}>Conversion legend</div>
               <div style={{ fontSize: 13, color: '#475569' }}>
@@ -239,9 +221,31 @@ export default function Index() {
               </div>
             </div>
           </div>
-        </div>
       </s-section>
-      <div style={cardStyle}>
+      <s-section heading="Product List">
+        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, alignItems: 'flex-start', marginBottom: 12 }}>
+          <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+            <div style={{ color: '#475569', fontSize: 13 }}>
+              Tracking is active. Data updates as visitors interact with your storefront.
+            </div>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <label style={{ fontSize: 13, color: '#475569' }}>Sort by</label>
+              <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} style={{ padding: 6, borderRadius: 6 }}>
+                <option value="conversion">Conversion</option>
+                <option value="views">Views</option>
+                <option value="atc">Add to Cart</option>
+                <option value="sales">Purchases</option>
+                <option value="name">Name</option>
+              </select>
+              <select value={sortDir} onChange={(e) => setSortDir(e.target.value)} style={{ padding: 6, borderRadius: 6 }}>
+                <option value="asc">Ascending</option>
+                <option value="desc">Descending</option>
+              </select>
+            </div>
+          </div>
+
+        </div>
+        <div style={cardStyle}>
           <table style={tableStyle}>
             <thead>
               <tr>
@@ -294,6 +298,7 @@ export default function Index() {
           </table>
           
         </div>
+      </s-section>
     </s-page>
   );
 }
