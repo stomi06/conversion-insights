@@ -2,6 +2,24 @@
 // It uses the global `Shopify` object when available; adapt as needed for your theme.
 (function () {
   const TRACK_ENDPOINT = window.CONVERSION_INSIGHTS_TRACK_URL || '/apps/conversion-insights/track';
+  // Attempt to discover the shop from the script URL (app-proxy adds ?shop=...).
+  function getShopFromScript() {
+    try {
+      const script = document.currentScript || (document.getElementsByTagName && document.getElementsByTagName('script')[document.getElementsByTagName('script').length - 1]);
+      const src = script && script.src;
+      if (!src) return null;
+      try {
+        const url = new URL(src, location.href);
+        return url.searchParams.get('shop');
+      } catch {
+        return null;
+      }
+    } catch {
+      return null;
+    }
+  }
+
+  const SCRIPT_SHOP = window.CONVERSION_INSIGHTS_SHOP || getShopFromScript();
   const STORAGE_KEY = 'conversion-insights-event-buffer-v1';
   const FLUSH_INTERVAL_MS = 15000;
   const MAX_BUFFERED_EVENTS = 5;
@@ -65,7 +83,9 @@
     });
 
     if (!events.length) return null;
-    return { events: events };
+    const payload = { events: events };
+    if (SCRIPT_SHOP) payload.shop = SCRIPT_SHOP;
+    return payload;
   }
 
   function flushBuffer(options) {
