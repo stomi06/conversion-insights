@@ -448,11 +448,16 @@ export default function Index() {
                 </th>
                 <th style={{ ...thStyle, width: 100, textAlign: "center" }}>
                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-                    <img src="/assets/sold.svg" alt="Sales" style={{ width: 14, height: 14 }} />
+                    <img src="/assets/dollar.svg" alt="Sales" style={{ width: 14, height: 14 }} />
                     Sales
                   </span>
                 </th>
-                <th style={{ ...thStyle, width: 120, textAlign: "center" }}>Conversion</th>
+                <th style={{ ...thStyle, width: 120, textAlign: "center" }}>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                    <img src="/assets/sold.svg" alt="Conversion" style={{ width: 14, height: 14 }} />
+                    Conversion
+                  </span>
+                </th>
                 <th style={{ ...thStyle, width: 170, textAlign: "center" }}>Status</th>
               </tr>
             </thead>
@@ -484,7 +489,7 @@ export default function Index() {
                       <div className="ci-metrics-line">
                         <span><img className="ci-metric-icon" src="/assets/eye.svg" alt="Views" />{product.stats.views}</span>
                         <span><img className="ci-metric-icon" src="/assets/cart.svg" alt="ATC" />{product.stats.addToCart}</span>
-                        <span><img className="ci-metric-icon" src="/assets/sold.svg" alt="Sales" />{product.stats.purchases}</span>
+                        <span><img className="ci-metric-icon" src="/assets/dollar.svg" alt="Sales" />{product.stats.purchases}</span>
                         <span>{(product.conversion * 100).toFixed(2)}%</span>
                       </div>
                     </td>
