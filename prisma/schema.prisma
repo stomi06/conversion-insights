@@ -32,3 +32,29 @@ model Session {
   refreshToken        String?
   refreshTokenExpires DateTime?
 }
+
+model ProductStatDaily {
+  id            String   @id @default(cuid())
+  shop          String
+  productId     String
+  day           DateTime
+  views         Int      @default(0)
+  addToCart     Int      @default(0)
+  purchases     Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([shop, productId, day])
+  @@index([shop, productId])
+  @@index([shop, day])
+}
+
+model ProcessedOrder {
+  id        String   @id @default(cuid())
+  shop      String
+  orderId   String
+  createdAt DateTime @default(now())
+
+  @@unique([shop, orderId])
+  @@index([shop])
+}

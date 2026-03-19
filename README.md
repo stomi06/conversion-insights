@@ -30,6 +30,33 @@ shopify app dev
 
 Press P to open the URL to your app. Once you click install, you can start development.
 
+## Conversion Insights tracking
+
+The app stores product stats in PostgreSQL using daily aggregation:
+
+- `views` and `add_to_cart` are buffered in `public/product-tracker.js` and sent in batches to `/api/track`.
+- `/api/track` aggregates incoming counters and persists them with Prisma in `ProductStatDaily`.
+- `purchases` are aggregated from the `orders/paid` webhook.
+- Dashboard data is loaded from the database every time the user opens/focuses the app stats page.
+
+### Required deploy steps (Shopify CLI)
+
+After pulling these changes:
+
+1. Run database migration:
+
+  ```shell
+  npm run setup
+  ```
+
+2. Sync webhook configuration (`orders/paid`) to Shopify:
+
+  ```shell
+  npm run deploy
+  ```
+
+3. Ensure storefront tracker script is loaded on product pages (Theme App Extension or theme include).
+
 Local development is powered by [the Shopify CLI](https://shopify.dev/docs/apps/tools/cli). It logs into your account, connects to an app, provides environment variables, updates remote config, creates a tunnel and provides commands to generate extensions.
 
 ### Authenticating and querying data

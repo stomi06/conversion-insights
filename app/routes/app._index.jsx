@@ -1,11 +1,12 @@
 import { boundary } from "@shopify/shopify-app-react-router/server";
 import { authenticate } from "../shopify.server";
-import { useLoaderData } from "react-router";
+import { useEffect } from "react";
+import { useLoaderData, useRevalidator } from "react-router";
+import { getStatsTotalsByProducts, normalizeProductId } from "../product-stats.server";
 
 export const loader = async ({ request }) => {
-  const { admin } = await authenticate.admin(request);
-  // Pobierz produkty
-  // Fetch products
+  const { admin, session } = await authenticate.admin(request);
+
   const response = await admin.graphql(
     `#graphql
       query getProducts {
@@ -14,12 +15,9 @@ export const loader = async ({ request }) => {
             node {
               id
               title
-              images(first: 1) {
-                edges {
-                  node {
-                    src
-                  }
-                }
+              legacyResourceId
+              featuredImage {
+                url
               }
             }
           }
@@ -27,15 +25,62 @@ export const loader = async ({ request }) => {
       }
     `
   );
+
   const json = await response.json();
-  const productList = json.data.products.edges.map(edge => edge.node);
-  return { productList };
+
+  const productList = json.data.products.edges.map((edge) => {
+    const product = edge.node;
+    return {
+      id: product.id,
+      title: product.title,
+      imageUrl: product.featuredImage?.url ?? null,
+      numericProductId: normalizeProductId(product.legacyResourceId ?? product.id),
+    };
+  });
+
+  const statsByProductId = await getStatsTotalsByProducts({
+    shop: session.shop,
+    productIds: productList.map((product) => product.numericProductId),
+  });
+
+  return {
+    productList: productList.map((product) => ({
+      ...product,
+      stats: statsByProductId.get(product.numericProductId) ?? {
+        views: 0,
+        addToCart: 0,
+        purchases: 0,
+      },
+    })),
+  };
 };
 
 
 
 export default function Index() {
   const { productList } = useLoaderData();
+  const revalidator = useRevalidator();
+
+  useEffect(() => {
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        revalidator.revalidate();
+      }
+    };
+
+    const onFocus = () => {
+      revalidator.revalidate();
+    };
+
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onVisibilityChange);
+
+    return () => {
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+    };
+  }, [revalidator]);
+
   const tableStyle = { width: "100%", borderCollapse: "collapse", fontFamily: "Inter, Arial, sans-serif" };
   const thStyle = { border: "1px solid #e6eef6", padding: "10px", textAlign: "left", background: "#f5f9ff", color: "#12263f" };
   const tdStyle = { border: "1px solid #e6eef6", padding: "10px", verticalAlign: "middle" };
@@ -61,16 +106,16 @@ export default function Index() {
                 <tr key={product.id} style={rowStyle}>
                   <td style={tdStyle}>{product.id}</td>
                   <td style={tdStyle}>
-                    {product.images.edges.length > 0 ? (
-                      <img src={product.images.edges[0].node.src} alt={product.title} style={{ width: 48, height: 48, objectFit: "cover", borderRadius: 6 }} />
+                    {product.imageUrl ? (
+                      <img src={product.imageUrl} alt={product.title} style={{ width: 48, height: 48, objectFit: "cover", borderRadius: 6 }} />
                     ) : (
                       <span style={{ color: "#94a3b8" }}>No image</span>
                     )}
                   </td>
                   <td style={tdStyle}>{product.title}</td>
-                  <td style={{ ...tdStyle, textAlign: "center", color: "#0f172a", fontWeight: 600 }}>0</td>
-                  <td style={{ ...tdStyle, textAlign: "center", color: "#0f172a", fontWeight: 600 }}>0</td>
-                  <td style={{ ...tdStyle, textAlign: "center", color: "#0f172a", fontWeight: 600 }}>0</td>
+                  <td style={{ ...tdStyle, textAlign: "center", color: "#0f172a", fontWeight: 600 }}>{product.stats.views}</td>
+                  <td style={{ ...tdStyle, textAlign: "center", color: "#0f172a", fontWeight: 600 }}>{product.stats.addToCart}</td>
+                  <td style={{ ...tdStyle, textAlign: "center", color: "#0f172a", fontWeight: 600 }}>{product.stats.purchases}</td>
                 </tr>
               );
             })}

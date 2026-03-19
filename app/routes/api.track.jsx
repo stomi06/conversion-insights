@@ -1,41 +1,69 @@
-// MVP API endpoint: /api/track
-// Przechowuje agregaty eventów w pliku JSON
-import fs from "fs";
-import path from "path";
+import {
+  buildEventCounters,
+  getStatsTotalsByProducts,
+  incrementDailyStats,
+} from "../product-stats.server";
 
-const DATA_PATH = path.resolve("./event-aggregates.json");
-
-function loadAggregates() {
-  if (!fs.existsSync(DATA_PATH)) return {};
-  return JSON.parse(fs.readFileSync(DATA_PATH, "utf8"));
-}
-
-function saveAggregates(data) {
-  fs.writeFileSync(DATA_PATH, JSON.stringify(data, null, 2));
-}
-
-export const action = async ({ request }) => {
-  const body = await request.json();
-  const { product_id, event } = body;
-  if (!product_id || !event) return new Response("Missing", { status: 400 });
-
-  const aggregates = loadAggregates();
-  if (!aggregates[product_id]) {
-    aggregates[product_id] = { views: 0, add_to_cart: 0, purchases: 0 };
-  }
-  if (event === "view") aggregates[product_id].views++;
-  if (event === "add_to_cart") aggregates[product_id].add_to_cart++;
-  if (event === "purchase") aggregates[product_id].purchases++;
-
-  saveAggregates(aggregates);
-  return new Response("ok");
+const CORS_HEADERS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type",
 };
 
-export const loader = async () => {
-  const aggregates = loadAggregates();
-  return new Response(JSON.stringify(aggregates), {
-    headers: { "Content-Type": "application/json" },
+export const action = async ({ request }) => {
+  if (request.method.toUpperCase() === "OPTIONS") {
+    return new Response(null, { status: 204, headers: CORS_HEADERS });
+  }
+
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return new Response(JSON.stringify({ error: "Invalid JSON body" }), {
+      status: 400,
+      headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
+    });
+  }
+
+  const shop = body?.shop ? String(body.shop).trim() : "";
+  if (!shop) {
+    return new Response(JSON.stringify({ error: "Missing shop" }), {
+      status: 400,
+      headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
+    });
+  }
+
+  const events = Array.isArray(body?.events)
+    ? body.events
+    : body?.product_id && body?.event
+      ? [body]
+      : [];
+
+  const countersByProduct = buildEventCounters(events);
+  const result = await incrementDailyStats({ shop, countersByProduct });
+
+  return new Response(JSON.stringify({ ok: true, ...result }), {
+    status: 200,
+    headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
   });
 };
 
-export default null;
+export const loader = async ({ request }) => {
+  const url = new URL(request.url);
+  const shop = url.searchParams.get("shop")?.trim() || "";
+  const productIds = url.searchParams.getAll("product_id");
+
+  if (!shop || productIds.length === 0) {
+    return new Response(JSON.stringify({}), {
+      headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
+    });
+  }
+
+  const stats = await getStatsTotalsByProducts({ shop, productIds });
+  const payload = Object.fromEntries(stats);
+
+  return new Response(JSON.stringify(payload), {
+    headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
+  });
+};
+
