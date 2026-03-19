@@ -240,7 +240,8 @@ export default function Index() {
             </div>
           </div>
         </div>
-        <div style={cardStyle}>
+      </s-section>
+      <div style={cardStyle}>
           <table style={tableStyle}>
             <thead>
               <tr>
@@ -293,7 +294,6 @@ export default function Index() {
           </table>
           
         </div>
-      </s-section>
     </s-page>
   );
 }
