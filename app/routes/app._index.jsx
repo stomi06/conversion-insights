@@ -224,7 +224,7 @@ export default function Index() {
         }
 
         .ci-overview-card {
-          flex: 1 1 280px;
+          flex: 1 1;
           min-width: 0;
           width: 100%;
           box-sizing: border-box;
