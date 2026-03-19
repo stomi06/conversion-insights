@@ -1,14 +1,10 @@
 // Insert this file into the storefront/theme (or Theme App Extension) and include on product pages.
 // It uses the global `Shopify` object when available; adapt as needed for your theme.
 (function () {
-  const TRACK_ENDPOINT = window.CONVERSION_INSIGHTS_TRACK_URL || '/api/track';
+  const TRACK_ENDPOINT = window.CONVERSION_INSIGHTS_TRACK_URL || '/apps/conversion-insights/track';
   const STORAGE_KEY = 'conversion-insights-event-buffer-v1';
   const FLUSH_INTERVAL_MS = 15000;
   const MAX_BUFFERED_EVENTS = 5;
-
-  function getShopDomain() {
-    return (window.Shopify && window.Shopify.shop) || '';
-  }
 
   function normalizeProductId(rawProductId) {
     if (rawProductId === null || rawProductId === undefined) return null;
@@ -57,9 +53,6 @@
   }
 
   function buildPayload(buffer) {
-    const shop = getShopDomain();
-    if (!shop) return null;
-
     const events = [];
     Object.keys(buffer).forEach(function (productId) {
       const counters = buffer[productId] || {};
@@ -72,7 +65,7 @@
     });
 
     if (!events.length) return null;
-    return { shop: shop, events: events };
+    return { events: events };
   }
 
   function flushBuffer(options) {

@@ -35,6 +35,7 @@ Press P to open the URL to your app. Once you click install, you can start devel
 The app stores product stats in PostgreSQL using daily aggregation:
 
 - `views` and `add_to_cart` are buffered in `public/product-tracker.js` and sent in batches to `/api/track`.
+- Storefront tracking is sent through Shopify App Proxy at `/apps/conversion-insights/track`.
 - `/api/track` aggregates incoming counters and persists them with Prisma in `ProductStatDaily`.
 - `purchases` are aggregated from the `orders/paid` webhook.
 - Dashboard data is loaded from the database every time the user opens/focuses the app stats page.
@@ -56,6 +57,7 @@ After pulling these changes:
   ```
 
 3. Ensure storefront tracker script is loaded on product pages (Theme App Extension or theme include).
+4. Confirm App Proxy has been synced (same `npm run deploy`) and requests to `/apps/conversion-insights/track` return `200`.
 
 Local development is powered by [the Shopify CLI](https://shopify.dev/docs/apps/tools/cli). It logs into your account, connects to an app, provides environment variables, updates remote config, creates a tunnel and provides commands to generate extensions.
 
