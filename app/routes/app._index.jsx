@@ -240,7 +240,7 @@ export default function Index() {
             </div>
           </div>
         </div>
-        <div style={cardStyle} ref={containerRef}>
+        <div style={cardStyle}>
           <table style={tableStyle}>
             <thead>
               <tr>
@@ -291,35 +291,7 @@ export default function Index() {
               })}
             </tbody>
           </table>
-          {openMenuProduct && (
-            <div ref={menuRef} style={{ position: 'absolute', top: menuPos.top, left: menuPos.left, zIndex: 9999 }}>
-              <div style={{ minWidth: 200, padding: 8, background: '#fff', border: '1px solid #e6eef6', borderRadius: 8, boxShadow: '0 8px 24px rgba(2,32,71,0.08)' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  <a href={`https://${shop}/admin/products/${openMenuProduct.numericProductId}`} target="_blank" rel="noreferrer" style={{ color: '#0369a1' }}>Open in Admin</a>
-                  <button onClick={async () => {
-                    if (!confirm('Remove product from tracking? This deletes aggregated stats.')) return;
-                    try {
-                      const res = await fetch('/api/untrack_product', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ productId: openMenuProduct.numericProductId }),
-                      });
-                      if (res.ok) {
-                        setOpenMenuProduct(null);
-                        revalidator.revalidate();
-                      } else {
-                        const txt = await res.text();
-                        alert('Remove failed: ' + txt);
-                      }
-                    } catch (err) {
-                      alert('Request failed');
-                    }
-                  }} style={{ padding: '6px 8px', borderRadius: 6, border: '1px solid #fee2e2', background: '#fff0f0', color: '#991b1b' }}>Remove from tracking</button>
-                  <button onClick={() => setOpenMenuProduct(null)} style={{ padding: '6px 8px', borderRadius: 6, border: '1px solid #e6eef6', background: '#ffffff' }}>Close</button>
-                </div>
-              </div>
-            </div>
-          )}
+          
         </div>
       </s-section>
     </s-page>
