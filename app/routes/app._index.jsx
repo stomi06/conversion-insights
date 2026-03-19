@@ -222,7 +222,7 @@ export default function Index() {
               <div style={{ fontSize: 13, color: '#475569' }}>
                 Conversion is calculated as <strong>purchases / views</strong> (over aggregated data).
                 <ul style={{ margin: "10px 0px 0px 20px", padding: 0 }}>
-                  <li>⚪ Not enough data — fewer than 10 views (insufficient sample to compute reliable conversion)</li>
+                  <li>⚪ Not enough data — fewer than 10 views</li>
                   <li>🔴 Losing sales — conversion &lt; 2% (0.02)</li>
                   <li>🟡 Low conversion — conversion ≥ 2% and &lt; 5% (0.02–0.05)</li>
                   <li>🟢 Good — conversion ≥ 5% (≥ 0.05)</li>
