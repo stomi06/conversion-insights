@@ -292,7 +292,7 @@ export default function Index() {
                         </span>
                         <div style={{ marginLeft: 8 }}>
                           <a href={`https://${shop}/admin/products/${product.numericProductId}`} target="_blank" rel="noreferrer" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 34, height: 34, borderRadius: 8, border: '1px solid #e6eef6', background: '#ffffff', color: '#0369a1', textDecoration: 'none' }} aria-label="Open product">
-                            <img src="/arrow/eye.svg" alt="Open product" style={{ width: 16, height: 16 }} />
+                            <img src="/assets/arrow.svg" alt="Open product" style={{ width: 16, height: 16 }} />
                           </a>
                         </div>
                       </div>
