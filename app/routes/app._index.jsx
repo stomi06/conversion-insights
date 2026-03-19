@@ -208,22 +208,125 @@ export default function Index() {
     boxShadow: "0 8px 24px rgba(2, 32, 71, 0.06)",
   };
   const titleCellWrap = { display: "flex", alignItems: "center", gap: 12 };
-  const titleTextStyle = { margin: 0, fontSize: 14, fontWeight: 600, color: "#0f172a" };
+  const titleTextStyle = { margin: 0, fontSize: 14, fontWeight: 600, color: "#0f172a", wordBreak: "break-word" };
   const subtitleTextStyle = { margin: "3px 0 0", fontSize: 12, color: "#64748b" };
   const metricStyle = { ...tdStyle, textAlign: "center", color: "#0f172a", fontWeight: 700 };
 
   return (
     <s-page heading="Store Products">
+      <style>{`
+        .ci-overview {
+          width: 100%;
+          display: flex;
+          gap: 12px;
+          align-items: stretch;
+          flex-wrap: wrap;
+        }
+
+        .ci-overview-card {
+          flex: 1 1 280px;
+          min-width: 0;
+          width: 100%;
+        }
+
+        .ci-list-header {
+          width: 100%;
+          display: flex;
+          gap: 12px;
+          align-items: center;
+          justify-content: space-between;
+          flex-wrap: wrap;
+        }
+
+        .ci-sort-controls {
+          display: flex;
+          gap: 8px;
+          align-items: center;
+          flex-wrap: wrap;
+        }
+
+        .ci-table-wrap {
+          width: 100%;
+          overflow: hidden;
+        }
+
+        @media (max-width: 768px) {
+          .ci-overview {
+            flex-direction: column;
+          }
+
+          .ci-overview-card {
+            width: 100%;
+            min-width: 0;
+          }
+
+          .ci-list-header {
+            align-items: stretch;
+          }
+
+          .ci-sort-controls {
+            width: 100%;
+          }
+
+          .ci-sort-controls select {
+            flex: 1 1 140px;
+            min-width: 0;
+          }
+
+          .ci-table thead {
+            display: none;
+          }
+
+          .ci-table,
+          .ci-table tbody,
+          .ci-table tr,
+          .ci-table td {
+            display: block;
+            width: 100%;
+          }
+
+          .ci-table tr {
+            border: 1px solid #e6eef6;
+            border-radius: 10px;
+            margin-bottom: 12px;
+            padding: 10px;
+            background: #ffffff;
+          }
+
+          .ci-table td {
+            border: none;
+            padding: 8px 0;
+          }
+
+          .ci-table td[data-label]::before {
+            content: attr(data-label);
+            display: block;
+            font-size: 12px;
+            color: #64748b;
+            font-weight: 700;
+            margin-bottom: 4px;
+          }
+
+          .ci-table td[data-label="Product"] {
+            padding-top: 0;
+          }
+
+          .ci-table td[data-label="Status"] > div {
+            width: 100%;
+            justify-content: space-between;
+          }
+        }
+      `}</style>
       <s-section heading="Overview">
-        <div style={{ display: 'flex', gap: 12, alignItems: 'stretch' }}>
-            <div style={{ padding: 12, borderRadius: 8, background: '#f8fafc', border: '1px solid #e6eef6', minWidth: 260 }}>
+        <div className="ci-overview">
+            <div className="ci-overview-card" style={{ padding: 12, borderRadius: 8, background: '#f8fafc', border: '1px solid #e6eef6' }}>
               <div style={{ fontWeight: 700, marginBottom: 8 }}>About this dashboard</div>
               <p style={{ color: '#475569', fontSize: 13 }}>
                 This dashboard helps you understand how your products are performing in terms of views, add-to-cart actions, and purchases. Use this information to identify which products are doing well and which may need attention to improve their performance.
               </p>
             </div>
 
-            <div style={{ padding: 12, borderRadius: 8, background: '#f8fafc', border: '1px solid #e6eef6', minWidth: 260 }}>
+            <div className="ci-overview-card" style={{ padding: 12, borderRadius: 8, background: '#f8fafc', border: '1px solid #e6eef6' }}>
               <div style={{ fontWeight: 700, marginBottom: 8 }}>Conversion legend</div>
               <div style={{ fontSize: 13, color: '#475569' }}>
                 Conversion is calculated as <strong>purchases / views</strong> (over aggregated data).
@@ -236,7 +339,7 @@ export default function Index() {
               </div>
             </div>
 
-            <div style={{ padding: 12, borderRadius: 8, background: '#f8fafc', border: '1px solid #e6eef6', minWidth: 260 }}>
+            <div className="ci-overview-card" style={{ padding: 12, borderRadius: 8, background: '#f8fafc', border: '1px solid #e6eef6' }}>
               <div style={{ fontWeight: 700, marginBottom: 8 }}>Contact</div>
               <div style={{ fontSize: 13, color: '#475569' }}>
                 Need help or want improvements? Contact us:
@@ -249,11 +352,11 @@ export default function Index() {
       </s-section>
       <s-section heading="Product List">
         <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, alignItems: 'flex-start', marginBottom: 12 }}>
-          <div style={{ width: '100%', display: 'flex', gap: 12, alignItems: 'center', justifyContent: 'space-between'}}>
+          <div className="ci-list-header">
             <div style={{ color: '#475569', fontSize: 13, fontWeight: 600 }}>
               Tracking is active. Data updates as visitors interact with your storefront.
             </div>
-            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <div className="ci-sort-controls">
                 <label style={{ fontSize: 13, color: '#475569' }}>Sort by</label>
                 <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} style={{ padding: 6, borderRadius: 6 }}>
                   <option value="conversion">Conversion</option>
@@ -271,7 +374,8 @@ export default function Index() {
 
         </div>
         <div style={cardStyle}>
-          <table style={tableStyle}>
+          <div className="ci-table-wrap">
+          <table className="ci-table" style={tableStyle}>
             <thead>
               <tr>
                 <th style={{ ...thStyle, width: 100, textAlign: "center" }}>Product</th>
@@ -287,7 +391,7 @@ export default function Index() {
                 const rowStyle = { background: i % 2 === 0 ? "#ffffff" : "#f8fbff" };
                 return (
                   <tr key={product.id} style={rowStyle}>
-                    <td style={tdStyle}>
+                    <td data-label="Product" style={tdStyle}>
                       <div style={titleCellWrap}>
                         {product.imageUrl ? (
                           <img src={product.imageUrl} alt={product.title} style={{ width: 50, height: 50, objectFit: "cover", borderRadius: 10, border: "1px solid #e2e8f0" }} />
@@ -302,11 +406,11 @@ export default function Index() {
                         </div>
                       </div>
                     </td>
-                    <td style={metricStyle}>{product.stats.views}</td>
-                    <td style={metricStyle}>{product.stats.addToCart}</td>
-                    <td style={metricStyle}>{product.stats.purchases}</td>
-                    <td style={metricStyle}>{(product.conversion * 100).toFixed(2)}%</td>
-                    <td style={tdStyle}>
+                    <td data-label="Views" style={metricStyle}>{product.stats.views}</td>
+                    <td data-label="ATC" style={metricStyle}>{product.stats.addToCart}</td>
+                    <td data-label="Sales" style={metricStyle}>{product.stats.purchases}</td>
+                    <td data-label="Conversion" style={metricStyle}>{(product.conversion * 100).toFixed(2)}%</td>
+                    <td data-label="Status" style={tdStyle}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <span style={{ display: "inline-block", padding: "6px 12px", borderRadius: 999, border: `1px solid ${product.statusColors.border}`, background: product.statusColors.background, color: product.statusColors.color, fontWeight: product.status.indexOf('🔴') === 0 ? 800 : 600, fontSize: 12, whiteSpace: 'nowrap' }}>
                           {product.status}
@@ -323,7 +427,7 @@ export default function Index() {
               })}
             </tbody>
           </table>
-          
+          </div>
         </div>
       </s-section>
     </s-page>
