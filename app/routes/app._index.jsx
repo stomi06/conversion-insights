@@ -175,6 +175,12 @@ export default function Index() {
     });
 
   const sortedProducts = [...productsWithInsights].sort((a, b) => {
+    // Always show products that have data (status !== '⚪ Not enough data') first
+    const aHasData = a.status !== '⚪ Not enough data';
+    const bHasData = b.status !== '⚪ Not enough data';
+    if (aHasData && !bHasData) return -1;
+    if (!aHasData && bHasData) return 1;
+
     const dir = sortDir === 'asc' ? 1 : -1;
     switch (sortBy) {
       case 'views':
