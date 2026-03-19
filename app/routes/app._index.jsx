@@ -1,6 +1,6 @@
 import { boundary } from "@shopify/shopify-app-react-router/server";
 import { authenticate } from "../shopify.server";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { useLoaderData, useRevalidator } from "react-router";
 import { getStatsTotalsByProducts, normalizeProductId } from "../product-stats.server";
 
@@ -100,28 +100,6 @@ export default function Index() {
     const [sortBy, setSortBy] = useState('conversion');
     const [sortDir, setSortDir] = useState('asc');
   const revalidator = useRevalidator();
-  const containerRef = useRef(null);
-  const menuRef = useRef(null);
-  const [openMenuProduct, setOpenMenuProduct] = useState(null);
-  const [menuPos, setMenuPos] = useState({ top: 0, left: 0 });
-
-  useEffect(() => {
-    if (!openMenuProduct) return;
-    function onDocClick(e) {
-      if (menuRef.current && !menuRef.current.contains(e.target)) {
-        setOpenMenuProduct(null);
-      }
-    }
-    function onResize() {
-      setOpenMenuProduct(null);
-    }
-    document.addEventListener('click', onDocClick);
-    window.addEventListener('resize', onResize);
-    return () => {
-      document.removeEventListener('click', onDocClick);
-      window.removeEventListener('resize', onResize);
-    };
-  }, [openMenuProduct]);
 
   useEffect(() => {
     const onVisibilityChange = () => {
@@ -217,23 +195,49 @@ export default function Index() {
   return (
     <s-page heading="Store Products">
       <s-section heading="Product List">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-          <div style={{ color: '#475569', fontSize: 13 }}>
-            Tracking is active. Data updates as visitors interact with your storefront.
+        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, alignItems: 'flex-start', marginBottom: 12 }}>
+          <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+            <div style={{ color: '#475569', fontSize: 13 }}>
+              Tracking is active. Data updates as visitors interact with your storefront.
+            </div>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <label style={{ fontSize: 13, color: '#475569' }}>Sort by</label>
+              <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} style={{ padding: 6, borderRadius: 6 }}>
+                <option value="conversion">Conversion</option>
+                <option value="views">Views</option>
+                <option value="atc">Add to Cart</option>
+                <option value="sales">Purchases</option>
+                <option value="name">Name</option>
+              </select>
+              <select value={sortDir} onChange={(e) => setSortDir(e.target.value)} style={{ padding: 6, borderRadius: 6 }}>
+                <option value="asc">Ascending</option>
+                <option value="desc">Descending</option>
+              </select>
+            </div>
           </div>
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            <label style={{ fontSize: 13, color: '#475569' }}>Sort by</label>
-            <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} style={{ padding: 6, borderRadius: 6 }}>
-              <option value="conversion">Conversion</option>
-              <option value="views">Views</option>
-              <option value="atc">Add to Cart</option>
-              <option value="sales">Purchases</option>
-              <option value="name">Name</option>
-            </select>
-            <select value={sortDir} onChange={(e) => setSortDir(e.target.value)} style={{ padding: 6, borderRadius: 6 }}>
-              <option value="asc">Ascending</option>
-              <option value="desc">Descending</option>
-            </select>
+
+          <div style={{ display: 'flex', gap: 12, alignItems: 'stretch' }}>
+            <div style={{ padding: 12, borderRadius: 8, background: '#f8fafc', border: '1px solid #e6eef6', minWidth: 260 }}>
+              <div style={{ fontWeight: 700, marginBottom: 8 }}>Conversion legend</div>
+              <div style={{ fontSize: 13, color: '#475569' }}>
+                Conversion is calculated as <strong>purchases / views</strong> (over aggregated data).
+                <ul style={{ margin: '8px 0 0 16px' }}>
+                  <li>🔴 Losing sales — conversion &lt; 2% (0.02)</li>
+                  <li>🟡 Low conversion — conversion ≥ 2% and &lt; 5% (0.02–0.05)</li>
+                  <li>🟢 Good — conversion ≥ 5% (≥ 0.05)</li>
+                </ul>
+              </div>
+            </div>
+
+            <div style={{ padding: 12, borderRadius: 8, background: '#fffef8', border: '1px solid #fbe9c8', minWidth: 220 }}>
+              <div style={{ fontWeight: 700, marginBottom: 8 }}>Contact</div>
+              <div style={{ fontSize: 13, color: '#475569' }}>
+                Need help or want improvements? Contact us:
+                <div style={{ marginTop: 8 }}>
+                  <a href="mailto:support@conversion-insights.app" style={{ color: '#0369a1' }}>support@conversion-insights.app</a>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
         <div style={cardStyle} ref={containerRef}>
@@ -278,17 +282,7 @@ export default function Index() {
                           {product.status}
                         </span>
                         <div style={{ marginLeft: 8 }}>
-                          <button onClick={(e) => {
-                            e.stopPropagation();
-                            const btn = e.currentTarget;
-                            const rect = btn.getBoundingClientRect();
-                            const containerRect = containerRef.current?.getBoundingClientRect() || { left: 0, top: 0 };
-                            setMenuPos({
-                              top: rect.top - containerRect.top + rect.height + window.scrollY,
-                              left: rect.left - containerRect.left + window.scrollX,
-                            });
-                            setOpenMenuProduct(product);
-                          }} aria-haspopup="true" aria-expanded={openMenuProduct?.numericProductId === product.numericProductId} style={{ padding: '6px 8px', borderRadius: 6, border: '1px solid #e6eef6', background: '#ffffff' }}>⋯</button>
+                          <a href={`https://${shop}/admin/products/${product.numericProductId}`} target="_blank" rel="noreferrer" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 34, height: 34, borderRadius: 8, border: '1px solid #e6eef6', background: '#ffffff', color: '#0369a1', textDecoration: 'none' }} aria-label="Open product">→</a>
                         </div>
                       </div>
                     </td>
