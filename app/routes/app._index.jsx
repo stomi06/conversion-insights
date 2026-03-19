@@ -254,8 +254,6 @@ export default function Index() {
 
         .ci-metrics-line-cell {
           display: none;
-          border-top: 1px solid #e6eef6;
-          border-bottom: 1px solid #e6eef6;
         }
 
         .ci-metrics-line {
@@ -353,6 +351,8 @@ export default function Index() {
 
           .ci-metrics-line-cell {
             display: block;
+            border-top: 1px solid #e6eef6;
+            border-bottom: 1px solid #e6eef6;
           }
 
           .ci-table td[data-label]::before {
