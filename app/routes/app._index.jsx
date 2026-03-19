@@ -228,7 +228,7 @@ export default function Index() {
       </s-section>
       <s-section heading="Product List">
         <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, alignItems: 'flex-start', marginBottom: 12 }}>
-          <div style={{ display: 'flex', gap: 12, alignItems: 'center', justifyContent: 'space-between'}}>
+          <div style={{ width: '100%', display: 'flex', gap: 12, alignItems: 'center', justifyContent: 'space-between'}}>
             <div style={{ color: '#475569', fontSize: 13 }}>
               Tracking is active. Data updates as visitors interact with your storefront.
             </div>
