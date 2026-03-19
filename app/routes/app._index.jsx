@@ -213,7 +213,7 @@ export default function Index() {
             <div style={{ padding: 12, borderRadius: 8, background: '#f8fafc', border: '1px solid #e6eef6', minWidth: 260 }}>
               <div style={{ fontWeight: 700, marginBottom: 8 }}>About this dashboard</div>
               <p style={{ color: '#475569', fontSize: 13 }}>
-                Welcome to Conversion Insights! This dashboard helps you understand how your products are performing in terms of views, add-to-cart actions, and purchases. The conversion rate is calculated as purchases divided by views, giving you a clear picture of how well each product is converting visitors into customers. Use this information to identify which products are doing well and which may need attention to improve their performance.
+                This dashboard helps you understand how your products are performing in terms of views, add-to-cart actions, and purchases. Use this information to identify which products are doing well and which may need attention to improve their performance.
               </p>
             </div>
 
@@ -244,7 +244,7 @@ export default function Index() {
         <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, alignItems: 'flex-start', marginBottom: 12 }}>
           <div style={{ width: '100%', display: 'flex', gap: 12, alignItems: 'center', justifyContent: 'space-between'}}>
             <div style={{ color: '#475569', fontSize: 13, fontWeight: 600 }}>
-              Find products that are losing sales.
+              Tracking is active. Data updates as visitors interact with your storefront.
             </div>
             <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
               <div style={{ fontSize: 13, color: '#94a3b8' }}>Sorted by conversion (worst first)</div>
