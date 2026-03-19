@@ -222,6 +222,7 @@ export default function Index() {
               <div style={{ fontSize: 13, color: '#475569' }}>
                 Conversion is calculated as <strong>purchases / views</strong> (over aggregated data).
                 <ul style={{ margin: "10px 0px 0px 20px", padding: 0 }}>
+                  <li>⚪ Not enough data — fewer than 10 views (insufficient sample to compute reliable conversion)</li>
                   <li>🔴 Losing sales — conversion &lt; 2% (0.02)</li>
                   <li>🟡 Low conversion — conversion ≥ 2% and &lt; 5% (0.02–0.05)</li>
                   <li>🟢 Good — conversion ≥ 5% (≥ 0.05)</li>
@@ -247,7 +248,19 @@ export default function Index() {
               Tracking is active. Data updates as visitors interact with your storefront.
             </div>
             <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-              <div style={{ fontSize: 13, color: '#94a3b8' }}>Sorted by conversion (worst first)</div>
+                <label style={{ fontSize: 13, color: '#475569' }}>Sort by</label>
+                <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} style={{ padding: 6, borderRadius: 6 }}>
+                  <option value="conversion">Conversion</option>
+                  <option value="views">Views</option>
+                  <option value="atc">Add to Cart</option>
+                  <option value="sales">Purchases</option>
+                  <option value="name">Name</option>
+                </select>
+                <select value={sortDir} onChange={(e) => setSortDir(e.target.value)} style={{ padding: 6, borderRadius: 6 }}>
+                  <option value="asc">Ascending</option>
+                  <option value="desc">Descending</option>
+                </select>
+                <div style={{ fontSize: 13, color: '#94a3b8' }}>Sorted by conversion (worst first)</div>
             </div>
           </div>
 
@@ -290,7 +303,7 @@ export default function Index() {
                     <td style={metricStyle}>{(product.conversion * 100).toFixed(2)}%</td>
                     <td style={tdStyle}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ display: "inline-block", padding: "6px 10px", borderRadius: 999, border: `1px solid ${product.statusColors.border}`, background: product.statusColors.background, color: product.statusColors.color, fontWeight: product.status.indexOf('🔴') === 0 ? 800 : 600, fontSize: 12 }}>
+                        <span style={{ display: "inline-block", padding: "6px 12px", borderRadius: 999, border: `1px solid ${product.statusColors.border}`, background: product.statusColors.background, color: product.statusColors.color, fontWeight: product.status.indexOf('🔴') === 0 ? 800 : 600, fontSize: 12, whiteSpace: 'nowrap' }}>
                           {product.status}
                         </span>
                         {product.status && product.status.indexOf('🔴') !== -1 && (
