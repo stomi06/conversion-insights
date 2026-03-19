@@ -128,14 +128,21 @@ export default function Index() {
       const purchases = Number(product?.stats?.purchases || 0);
       const conversion = views > 0 ? purchases / views : 0;
 
-      let status = "🔴 Losing sales";
+      let status = "⚪ Not enough data";
       let statusColors = {
-        color: "#991b1b",
-        background: "#fee2e2",
-        border: "#fecaca",
+        color: "#475569",
+        background: "#f8fafc",
+        border: "#e6eef6",
       };
 
-      if (conversion >= 0.05) {
+      if (views < 10) {
+        status = "⚪ Not enough data";
+        statusColors = {
+          color: "#475569",
+          background: "#f8fafc",
+          border: "#e6eef6",
+        };
+      } else if (conversion >= 0.05) {
         status = "🟢 Good";
         statusColors = {
           color: "#166534",
@@ -148,6 +155,13 @@ export default function Index() {
           color: "#854d0e",
           background: "#fef9c3",
           border: "#fde68a",
+        };
+      } else {
+        status = "🔴 At risk";
+        statusColors = {
+          color: "#7f1d1d",
+          background: "#fecaca",
+          border: "#fca5a5",
         };
       }
 
@@ -229,22 +243,11 @@ export default function Index() {
       <s-section heading="Product List">
         <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, alignItems: 'flex-start', marginBottom: 12 }}>
           <div style={{ width: '100%', display: 'flex', gap: 12, alignItems: 'center', justifyContent: 'space-between'}}>
-            <div style={{ color: '#475569', fontSize: 13 }}>
-              Tracking is active. Data updates as visitors interact with your storefront.
+            <div style={{ color: '#475569', fontSize: 13, fontWeight: 600 }}>
+              Find products that are losing sales.
             </div>
             <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-              <label style={{ fontSize: 13, color: '#475569' }}>Sort by</label>
-              <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} style={{ padding: 6, borderRadius: 6 }}>
-                <option value="conversion">Conversion</option>
-                <option value="views">Views</option>
-                <option value="atc">Add to Cart</option>
-                <option value="sales">Purchases</option>
-                <option value="name">Name</option>
-              </select>
-              <select value={sortDir} onChange={(e) => setSortDir(e.target.value)} style={{ padding: 6, borderRadius: 6 }}>
-                <option value="asc">Ascending</option>
-                <option value="desc">Descending</option>
-              </select>
+              <div style={{ fontSize: 13, color: '#94a3b8' }}>Sorted by conversion (worst first)</div>
             </div>
           </div>
 
@@ -287,9 +290,14 @@ export default function Index() {
                     <td style={metricStyle}>{(product.conversion * 100).toFixed(2)}%</td>
                     <td style={tdStyle}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ display: "inline-block", padding: "6px 10px", borderRadius: 999, border: `1px solid ${product.statusColors.border}`, background: product.statusColors.background, color: product.statusColors.color, fontWeight: 600, fontSize: 12 }}>
+                        <span style={{ display: "inline-block", padding: "6px 10px", borderRadius: 999, border: `1px solid ${product.statusColors.border}`, background: product.statusColors.background, color: product.statusColors.color, fontWeight: product.status.indexOf('🔴') === 0 ? 800 : 600, fontSize: 12 }}>
                           {product.status}
                         </span>
+                        {product.status && product.status.indexOf('🔴') !== -1 && (
+                          <div style={{ marginTop: 6, color: '#7f1d1d', fontSize: 13 }}>
+                            Customers add to cart but don’t buy
+                          </div>
+                        )}
                         <div style={{ marginLeft: 8 }}>
                           <a href={`https://${shop}/admin/products/${product.numericProductId}`} target="_blank" rel="noreferrer" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 34, height: 34, borderRadius: 8, border: '1px solid #e6eef6', background: '#ffffff', color: '#0369a1', textDecoration: 'none' }} aria-label="Open product">
                             <img src="/assets/arrow.svg" alt="Open product" style={{ width: 16, height: 16 }} />
