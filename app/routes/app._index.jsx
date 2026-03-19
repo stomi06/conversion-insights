@@ -199,7 +199,7 @@ export default function Index() {
 
   const tableStyle = { width: "100%", borderCollapse: "collapse", fontFamily: "Inter, Arial, sans-serif" };
   const thStyle = { border: "none", borderBottom: "1px solid #dbeafe", padding: "11px", textAlign: "left", background: "#eef6ff", color: "#12263f" };
-  const tdStyle = { border: "none", borderBottom: "1px solid #eef2f7", padding: "11px", verticalAlign: "middle" };
+  const tdStyle = { border: "none", padding: "11px", verticalAlign: "middle" };
   const cardStyle = {
     background: "linear-gradient(180deg, #ffffff 0%, #f8fbff 100%)",
     border: "1px solid #dbeafe",
