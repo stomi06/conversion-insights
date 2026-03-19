@@ -196,9 +196,13 @@ export default function Index() {
     <s-page heading="Store Products">
       <s-section heading="Overview">
         <div style={{ display: 'flex', gap: 12, alignItems: 'stretch' }}>
-            <p style={{ color: '#475569', fontSize: 13 }}>
-              Welcome to Conversion Insights! This dashboard helps you understand how your products are performing in terms of views, add-to-cart actions, and purchases. The conversion rate is calculated as purchases divided by views, giving you a clear picture of how well each product is converting visitors into customers. Use this information to identify which products are doing well and which may need attention to improve their performance.
-            </p>
+            <div style={{ padding: 12, borderRadius: 8, background: '#fffef8', border: '1px solid #fbe9c8', minWidth: 220 }}>
+              <div style={{ fontWeight: 700, marginBottom: 8 }}>About this dashboard</div>
+              <p style={{ color: '#475569', fontSize: 13 }}>
+                Welcome to Conversion Insights! This dashboard helps you understand how your products are performing in terms of views, add-to-cart actions, and purchases. The conversion rate is calculated as purchases divided by views, giving you a clear picture of how well each product is converting visitors into customers. Use this information to identify which products are doing well and which may need attention to improve their performance.
+              </p>
+            </div>
+
             <div style={{ padding: 12, borderRadius: 8, background: '#f8fafc', border: '1px solid #e6eef6', minWidth: 260 }}>
               <div style={{ fontWeight: 700, marginBottom: 8 }}>Conversion legend</div>
               <div style={{ fontSize: 13, color: '#475569' }}>
@@ -224,7 +228,7 @@ export default function Index() {
       </s-section>
       <s-section heading="Product List">
         <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, alignItems: 'flex-start', marginBottom: 12 }}>
-          <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+          <div style={{ display: 'space-between', gap: 12, alignItems: 'center' }}>
             <div style={{ color: '#475569', fontSize: 13 }}>
               Tracking is active. Data updates as visitors interact with your storefront.
             </div>
@@ -249,7 +253,7 @@ export default function Index() {
           <table style={tableStyle}>
             <thead>
               <tr>
-                <th style={thStyle}>Product</th>
+                <th style={{ ...thStyle, width: 100, textAlign: "center" }}>Product</th>
                 <th style={{ ...thStyle, width: 100, textAlign: "center" }}>Views</th>
                 <th style={{ ...thStyle, width: 110, textAlign: "center" }}>ATC</th>
                 <th style={{ ...thStyle, width: 100, textAlign: "center" }}>Sales</th>
