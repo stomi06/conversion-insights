@@ -26,6 +26,12 @@ export const action = async ({ request }) => {
     countersByProduct,
   });
 
+  if (result.updated > 0) {
+    console.log(
+      `[conversion-insights] tracked ${result.updated} product aggregates for ${session.shop}`,
+    );
+  }
+
   return new Response(JSON.stringify({ ok: true, ...result }), {
     status: 200,
     headers: { "Content-Type": "application/json" },

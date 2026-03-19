@@ -57,7 +57,17 @@ After pulling these changes:
   ```
 
 3. Ensure storefront tracker script is loaded on product pages (Theme App Extension or theme include).
+
+   Minimal theme include (e.g. in `theme.liquid` before `</body>`):
+
+   ```liquid
+   {% if template contains 'product' %}
+     <script defer src="/apps/conversion-insights/tracker.js"></script>
+   {% endif %}
+   ```
+
 4. Confirm App Proxy has been synced (same `npm run deploy`) and requests to `/apps/conversion-insights/track` return `200`.
+5. Check app logs for lines starting with `[conversion-insights] tracked ...`.
 
 Local development is powered by [the Shopify CLI](https://shopify.dev/docs/apps/tools/cli). It logs into your account, connects to an app, provides environment variables, updates remote config, creates a tunnel and provides commands to generate extensions.
 
