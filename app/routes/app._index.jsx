@@ -369,6 +369,7 @@ export default function Index() {
           .ci-table td[data-label="Status"] > div {
             width: 100%;
             justify-content: space-between;
+            border-bottom: none;
           }
         }
       `}</style>
@@ -490,7 +491,7 @@ export default function Index() {
                         <span><img className="ci-metric-icon" src="/assets/eye.svg" alt="Views" />{product.stats.views}</span>
                         <span><img className="ci-metric-icon" src="/assets/cart.svg" alt="ATC" />{product.stats.addToCart}</span>
                         <span><img className="ci-metric-icon" src="/assets/dollar.svg" alt="Sales" />{product.stats.purchases}</span>
-                        <span>{(product.conversion * 100).toFixed(2)}%</span>
+                        <span><img className="ci-metric-icon" src="/assets/sold.svg" alt="Conversion" />{(product.conversion * 100).toFixed(2)}%</span>
                       </div>
                     </td>
                     <td data-label="Status" style={tdStyle}>
