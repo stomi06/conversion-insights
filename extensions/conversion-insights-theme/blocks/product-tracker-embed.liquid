@@ -1,5 +1,9 @@
 {% if request.page_type == 'product' %}
-  <script defer src="/apps/conversion-insights/tracker.js"></script>
+  <script>
+    window.CONVERSION_INSIGHTS_TRACK_URL = '/apps/conversion-insights/track';
+    window.CONVERSION_INSIGHTS_SHOP = {{ shop.permanent_domain | json }};
+  </script>
+  <script src="{{ 'product-tracker.js' | asset_url }}" defer></script>
 {% endif %}
 
 {% schema %}
