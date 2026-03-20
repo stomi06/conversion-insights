@@ -56,18 +56,45 @@ After pulling these changes:
   npm run deploy
   ```
 
-3. Ensure storefront tracker script is loaded on product pages (Theme App Extension or theme include).
+3. Use the Theme App Extension and activate the app embed:
 
-   Minimal theme include (e.g. in `theme.liquid` before `</body>`):
+  1. Run deployment so extension version is available in the store:
 
-   ```liquid
-   {% if template contains 'product' %}
-     <script defer src="/apps/conversion-insights/tracker.js"></script>
-   {% endif %}
-   ```
+    ```shell
+    npm run deploy
+    ```
+
+  2. In Shopify Admin open **Online Store → Themes → Customize**.
+  3. In the theme editor, open **App embeds** (left sidebar).
+  4. Enable **Conversion Insights - Product tracker**.
+  5. Save the theme.
+  6. (Optional) Preview before enabling on live theme by opening an unpublished theme in the editor and enabling the embed there first.
+
+  Notes:
+  - The embed is deactivated by default until the merchant enables it.
+  - Tracking runs only on product pages.
 
 4. Confirm App Proxy has been synced (same `npm run deploy`) and requests to `/apps/conversion-insights/track` return `200`.
 5. Check app logs for lines starting with `[conversion-insights] tracked ...`.
+
+## Theme app extension onboarding and uninstall
+
+This app integrates with Online Store themes using a Theme App Extension (app embed block), not by editing theme code.
+
+### Onboarding instructions for merchants
+
+1. Install the app.
+2. Open **Online Store → Themes → Customize**.
+3. Open **App embeds**.
+4. Enable **Conversion Insights - Product tracker**.
+5. Save.
+6. Visit a product page on the storefront to verify tracking is active.
+
+### How to disable or remove storefront integration
+
+- Disable temporarily: turn off **Conversion Insights - Product tracker** in **App embeds** and save.
+- Uninstall cleanup: before or after uninstalling the app, ensure the app embed is disabled in the theme editor.
+- No manual theme code cleanup is required for the current integration because the app uses a Theme App Extension (no direct theme file edits).
 
 Local development is powered by [the Shopify CLI](https://shopify.dev/docs/apps/tools/cli). It logs into your account, connects to an app, provides environment variables, updates remote config, creates a tunnel and provides commands to generate extensions.
 

@@ -28,43 +28,6 @@ export const loader = async ({ request }) => {
 
   const json = await response.json();
 
-  // Ensure storefront script tag exists so tracker is injected automatically
-  try {
-    const tagsResp = await admin.graphql(`#graphql
-      query getScriptTags {
-        scriptTags(first: 50) {
-          nodes {
-            id
-            src
-          }
-        }
-      }
-    `);
-    const tagsJson = await tagsResp.json();
-    const nodes = tagsJson?.data?.scriptTags?.nodes || [];
-    const trackerUrl = `${process.env.SHOPIFY_APP_URL.replace(/\/+$/, "")}/apps/conversion-insights/tracker.js`;
-    const exists = nodes.some((n) => n.src && n.src.indexOf('/apps/conversion-insights/tracker.js') !== -1 || n.src === trackerUrl);
-    if (!exists) {
-      await admin.graphql(`#graphql
-        mutation createScriptTag($input: ScriptTagInput!) {
-          scriptTagCreate(input: $input) {
-            scriptTag { id src }
-            userErrors { field message }
-          }
-        }
-      `, {
-        variables: {
-          input: {
-            src: trackerUrl,
-            displayScope: 'ONLINE_STORE',
-          },
-        },
-      });
-    }
-  } catch (err) {
-    console.warn('script tag registration failed', err?.message ?? err);
-  }
-
   const productList = json.data.products.edges.map((edge) => {
     const product = edge.node;
     return {

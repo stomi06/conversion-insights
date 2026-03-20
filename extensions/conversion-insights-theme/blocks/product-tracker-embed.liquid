@@ -1,0 +1,11 @@
+{% if request.page_type == 'product' %}
+  <script defer src="/apps/conversion-insights/tracker.js"></script>
+{% endif %}
+
+{% schema %}
+{
+  "name": "Conversion Insights - Product tracker",
+  "target": "body",
+  "settings": []
+}
+{% endschema %}
