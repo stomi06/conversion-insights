@@ -60,9 +60,22 @@ export const loader = async ({ request }) => {
 
 export default function Index() {
   const { productList, shop } = useLoaderData();
-    const [sortBy, setSortBy] = useState('conversion');
-    const [sortDir, setSortDir] = useState('asc');
+  const [sortBy, setSortBy] = useState('conversion');
+  const [sortDir, setSortDir] = useState('asc');
+  const [showSetupPanel, setShowSetupPanel] = useState(false);
   const revalidator = useRevalidator();
+
+  const setupPanelStorageKey = `conversion-insights-embed-setup-complete:${shop}`;
+  const themeEditorUrl = `https://${shop}/admin/themes/current/editor?context=apps`;
+
+  useEffect(() => {
+    try {
+      const isSetupCompleted = window.localStorage.getItem(setupPanelStorageKey) === '1';
+      setShowSetupPanel(!isSetupCompleted);
+    } catch {
+      setShowSetupPanel(true);
+    }
+  }, [setupPanelStorageKey]);
 
   useEffect(() => {
     const onVisibilityChange = () => {
@@ -83,6 +96,15 @@ export default function Index() {
       document.removeEventListener("visibilitychange", onVisibilityChange);
     };
   }, [revalidator]);
+
+  const markSetupPanelCompleted = () => {
+    try {
+      window.localStorage.setItem(setupPanelStorageKey, '1');
+    } catch {
+      // no-op
+    }
+    setShowSetupPanel(false);
+  };
 
   const productsWithInsights = [...productList]
     .map((product) => {
@@ -177,6 +199,26 @@ export default function Index() {
 
   return (
     <s-page heading="Conversion Insights" fullWidth>
+      {showSetupPanel ? (
+        <s-section>
+          <div style={{ padding: 14, borderRadius: 10, border: '1px solid #dbeafe', background: '#eff6ff' }}>
+            <div style={{ fontWeight: 700, color: '#1e3a8a', marginBottom: 8 }}>
+              Enable the app embed in your theme (1 minute)
+            </div>
+            <div style={{ color: '#334155', fontSize: 13, marginBottom: 12 }}>
+              Open the theme editor, go to <strong>App embeds</strong>, enable <strong>Conversion Insights</strong>, and save the theme.
+            </div>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              <a href={themeEditorUrl} target="_blank" rel="noreferrer" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', height: 34, padding: '0 12px', borderRadius: 8, background: '#2563eb', color: '#ffffff', textDecoration: 'none', fontSize: 13, fontWeight: 600 }}>
+                Open theme editor
+              </a>
+              <button type="button" onClick={markSetupPanelCompleted} style={{ height: 34, padding: '0 12px', borderRadius: 8, border: '1px solid #bfdbfe', background: '#ffffff', color: '#1d4ed8', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
+                Done, embed enabled
+              </button>
+            </div>
+          </div>
+        </s-section>
+      ) : null}
       <style>{`
         .ci-overview {
           width: 100%;
