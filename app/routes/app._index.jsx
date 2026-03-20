@@ -198,12 +198,12 @@ export default function Index() {
   const metricStyle = { ...tdStyle, textAlign: "center", color: "#0f172a", fontWeight: 700 };
 
   return (
-    <s-page heading="Conversion Insights" fullWidth>
+    <s-page heading="Conversion Insights by DevoWave" fullWidth>
       {showSetupPanel ? (
         <s-section>
           <div style={{ padding: 14, borderRadius: 10, border: '1px solid #dbeafe', background: '#eff6ff' }}>
             <div style={{ fontWeight: 700, color: '#1e3a8a', marginBottom: 8 }}>
-              Enable the app embed in your theme (1 minute)
+              Enable the app embed in your theme
             </div>
             <div style={{ color: '#334155', fontSize: 13, marginBottom: 12 }}>
               Open the theme editor, go to <strong>App embeds</strong>, enable <strong>Conversion Insights</strong>, and save the theme.
