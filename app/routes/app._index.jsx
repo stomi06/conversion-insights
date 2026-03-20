@@ -363,7 +363,7 @@ export default function Index() {
               <div style={{ fontSize: 13, color: '#475569' }}>
                 Need help or want improvements? Contact us:
                 <div style={{ marginTop: 8 }}>
-                  <a href="mailto:stoma.michal6@gmail.com" style={{ color: '#0369a1' }}>stoma.michal6@gmail.com</a>
+                  <a href="mailto:info.devowave@gmail.com" style={{ color: '#0369a1' }}>info.devowave@gmail.com</a>
                 </div>
               </div>
             </div>
