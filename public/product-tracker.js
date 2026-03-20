@@ -1,6 +1,12 @@
 // Insert this file into the storefront/theme (or Theme App Extension) and include on product pages.
 // It uses the global `Shopify` object when available; adapt as needed for your theme.
 (function () {
+  const INIT_KEY = '__conversionInsightsTrackerInitialized';
+  if (window[INIT_KEY]) {
+    return;
+  }
+  window[INIT_KEY] = true;
+
   const TRACK_ENDPOINT = window.CONVERSION_INSIGHTS_TRACK_URL || '/apps/conversion-insights/track';
   // Attempt to discover the shop from the script URL (app-proxy adds ?shop=...).
   function getShopFromScript() {
