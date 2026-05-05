@@ -1,42 +1,72 @@
 import { boundary } from "@shopify/shopify-app-react-router/server";
 import { authenticate } from "../shopify.server";
 import { useEffect, useState } from "react";
-import { useLoaderData, useRevalidator } from "react-router";
+import { useLoaderData, useRevalidator, useSearchParams } from "react-router";
 import { getStatsTotalsByProducts, normalizeProductId } from "../product-stats.server";
+
+const PAGE_SIZE = 10;
+
+async function loadAllProducts(admin) {
+  const products = [];
+  let hasNextPage = true;
+  let after = null;
+
+  while (hasNextPage) {
+    const response = await admin.graphql(
+      `#graphql
+        query getProducts($first: Int!, $after: String) {
+          products(first: $first, after: $after) {
+            edges {
+              node {
+                id
+                title
+                legacyResourceId
+                featuredImage {
+                  url
+                }
+              }
+            }
+            pageInfo {
+              hasNextPage
+              endCursor
+            }
+          }
+        }
+      `,
+      {
+        variables: {
+          first: 250,
+          after,
+        },
+      },
+    );
+
+    const json = await response.json();
+    const edges = json?.data?.products?.edges ?? [];
+
+    products.push(
+      ...edges.map((edge) => {
+        const product = edge.node;
+        return {
+          id: product.id,
+          title: product.title,
+          imageUrl: product.featuredImage?.url ?? null,
+          numericProductId: normalizeProductId(product.legacyResourceId ?? product.id),
+        };
+      }),
+    );
+
+    hasNextPage = Boolean(json?.data?.products?.pageInfo?.hasNextPage);
+    after = json?.data?.products?.pageInfo?.endCursor ?? null;
+  }
+
+  return products;
+}
 
 export const loader = async ({ request }) => {
   const { admin, session } = await authenticate.admin(request);
 
-  const response = await admin.graphql(
-    `#graphql
-      query getProducts {
-        products(first: 20) {
-          edges {
-            node {
-              id
-              title
-              legacyResourceId
-              featuredImage {
-                url
-              }
-            }
-          }
-        }
-      }
-    `
-  );
-
-  const json = await response.json();
-
-  const productList = json.data.products.edges.map((edge) => {
-    const product = edge.node;
-    return {
-      id: product.id,
-      title: product.title,
-      imageUrl: product.featuredImage?.url ?? null,
-      numericProductId: normalizeProductId(product.legacyResourceId ?? product.id),
-    };
-  });
+  const productList = await loadAllProducts(admin);
 
   const statsByProductId = await getStatsTotalsByProducts({
     shop: session.shop,
@@ -63,6 +93,7 @@ export default function Index() {
   const [sortBy, setSortBy] = useState('conversion');
   const [sortDir, setSortDir] = useState('asc');
   const [showSetupPanel, setShowSetupPanel] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
   const revalidator = useRevalidator();
 
   const setupPanelStorageKey = `conversion-insights-embed-setup-complete:${shop}`;
@@ -159,6 +190,9 @@ export default function Index() {
       };
     });
 
+  const rawPage = Number.parseInt(searchParams.get("page") || "1", 10);
+  const requestedPage = Number.isFinite(rawPage) && rawPage > 0 ? rawPage : 1;
+
   const sortedProducts = [...productsWithInsights].sort((a, b) => {
     // Always show products that have data (status !== '⚪ Not enough data') first
     const aHasData = a.status !== '⚪ Not enough data';
@@ -181,6 +215,39 @@ export default function Index() {
         return (a.conversion - b.conversion) * dir;
     }
   });
+
+  const totalPages = Math.max(1, Math.ceil(sortedProducts.length / PAGE_SIZE));
+  const currentPage = Math.min(requestedPage, totalPages);
+  const pageStart = (currentPage - 1) * PAGE_SIZE;
+  const paginatedProducts = sortedProducts.slice(pageStart, pageStart + PAGE_SIZE);
+
+  useEffect(() => {
+    if (requestedPage !== currentPage) {
+      const nextParams = new URLSearchParams(searchParams);
+      nextParams.set("page", String(currentPage));
+      setSearchParams(nextParams, { replace: true });
+    }
+  }, [currentPage, requestedPage, searchParams, setSearchParams]);
+
+  const updatePage = (nextPage) => {
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.set("page", String(Math.min(Math.max(nextPage, 1), totalPages)));
+    setSearchParams(nextParams, { replace: true });
+  };
+
+  const handleSortByChange = (value) => {
+    setSortBy(value);
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.set("page", "1");
+    setSearchParams(nextParams, { replace: true });
+  };
+
+  const handleSortDirChange = (value) => {
+    setSortDir(value);
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.set("page", "1");
+    setSearchParams(nextParams, { replace: true });
+  };
 
   const tableStyle = { width: "100%", borderCollapse: "collapse", fontFamily: "Inter, Arial, sans-serif" };
   const thStyle = { border: "none", borderBottom: "1px solid #dbeafe", padding: "11px", textAlign: "left", background: "#eef6ff", color: "#12263f" };
@@ -419,14 +486,14 @@ export default function Index() {
             </div>
             <div className="ci-sort-controls">
                 <label style={{ fontSize: 13, color: '#475569' }}>Sort by</label>
-                <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} style={{ padding: 6, borderRadius: 6 }}>
+                <select value={sortBy} onChange={(e) => handleSortByChange(e.target.value)} style={{ padding: 6, borderRadius: 6 }}>
                   <option value="conversion">Conversion</option>
                   <option value="views">Views</option>
                   <option value="atc">Add to Cart</option>
                   <option value="sales">Purchases</option>
                   <option value="name">Name</option>
                 </select>
-                <select value={sortDir} onChange={(e) => setSortDir(e.target.value)} style={{ padding: 6, borderRadius: 6 }}>
+                <select value={sortDir} onChange={(e) => handleSortDirChange(e.target.value)} style={{ padding: 6, borderRadius: 6 }}>
                   <option value="asc">Ascending</option>
                   <option value="desc">Descending</option>
                 </select>
@@ -468,7 +535,7 @@ export default function Index() {
               </tr>
             </thead>
             <tbody>
-              {sortedProducts.map((product, i) => {
+              {paginatedProducts.map((product, i) => {
                 const rowStyle = { background: i % 2 === 0 ? "#ffffff" : "#f8fbff" };
                 return (
                   <tr key={product.id} style={rowStyle}>
@@ -516,6 +583,42 @@ export default function Index() {
               })}
             </tbody>
           </table>
+          {totalPages > 1 ? (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', padding: '12px 14px', borderTop: '1px solid #e6eef6', background: '#f8fbff' }}>
+              <div style={{ color: '#475569', fontSize: 13, fontWeight: 600 }}>
+                Showing {sortedProducts.length === 0 ? 0 : pageStart + 1}-{Math.min(pageStart + PAGE_SIZE, sortedProducts.length)} of {sortedProducts.length}
+              </div>
+              <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  onClick={() => updatePage(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  style={{ height: 32, padding: '0 12px', borderRadius: 8, border: '1px solid #dbeafe', background: currentPage === 1 ? '#f8fafc' : '#ffffff', color: currentPage === 1 ? '#94a3b8' : '#0f172a', cursor: currentPage === 1 ? 'not-allowed' : 'pointer', fontWeight: 600 }}
+                >
+                  Previous
+                </button>
+                {Array.from({ length: totalPages }, (_, index) => index + 1).map((pageNumber) => (
+                  <button
+                    key={pageNumber}
+                    type="button"
+                    onClick={() => updatePage(pageNumber)}
+                    aria-current={pageNumber === currentPage ? "page" : undefined}
+                    style={{ height: 32, minWidth: 32, padding: '0 10px', borderRadius: 8, border: '1px solid ' + (pageNumber === currentPage ? '#2563eb' : '#dbeafe'), background: pageNumber === currentPage ? '#2563eb' : '#ffffff', color: pageNumber === currentPage ? '#ffffff' : '#0f172a', cursor: 'pointer', fontWeight: 700 }}
+                  >
+                    {pageNumber}
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => updatePage(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  style={{ height: 32, padding: '0 12px', borderRadius: 8, border: '1px solid #dbeafe', background: currentPage === totalPages ? '#f8fafc' : '#ffffff', color: currentPage === totalPages ? '#94a3b8' : '#0f172a', cursor: currentPage === totalPages ? 'not-allowed' : 'pointer', fontWeight: 600 }}
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          ) : null}
           </div>
         </div>
       </s-section>
