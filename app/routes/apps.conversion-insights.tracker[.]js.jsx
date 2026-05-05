@@ -8,7 +8,34 @@ export const loader = async ({ request }) => {
   // The script is public JS and should be loadable by storefront pages.
   const script = await fs.readFile(TRACKER_PATH, "utf8");
 
-  return new Response(script, {
+  // Try to infer the shop domain so the client script can include it in payloads.
+  let shop = null;
+  try {
+    const url = new URL(request.url);
+    shop = url.searchParams.get("shop") || null;
+  } catch {
+    shop = null;
+  }
+
+  if (!shop) {
+    const referer = String(request.headers.get("referer") || "");
+    try {
+      const refUrl = new URL(referer);
+      if (refUrl.hostname) shop = refUrl.hostname;
+    } catch {
+      // ignore
+    }
+  }
+
+  let prefix = "";
+  if (shop) {
+    prefix += `window.CONVERSION_INSIGHTS_SHOP = ${JSON.stringify(shop)};\n`;
+    prefix += `window.CONVERSION_INSIGHTS_TRACK_URL = ${JSON.stringify("/apps/conversion-insights/track")};\n`;
+  }
+
+  const finalScript = prefix + script;
+
+  return new Response(finalScript, {
     headers: {
       "Content-Type": "application/javascript; charset=utf-8",
       "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
